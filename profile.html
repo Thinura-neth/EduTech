@@ -68,7 +68,10 @@
                                 <span id="profileUserId">Loading...</span>
                             </div>
                         </div>
-                        <button class="btn btn-secondary" onclick="editProfile()" style="margin-top: 1rem;">Edit Profile</button>
+                        <div class="action-buttons" style="margin-top: 1rem;">
+                            <button class="btn btn-secondary" onclick="showEditNameModal()">Change Name</button>
+                            <button class="btn btn-secondary" onclick="showChangePasswordModal()">Change Password</button>
+                        </div>
                     </div>
 
                     <div class="card">
@@ -114,6 +117,68 @@
             </div>
         </div>
     </main>
+
+    <!-- Edit Name Modal -->
+    <div id="editNameModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Change Your Name</h3>
+                <span class="close" onclick="closeEditNameModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editNameForm">
+                    <div class="form-group">
+                        <label for="newName">New Full Name:</label>
+                        <input type="text" id="newName" required placeholder="Enter your full name">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditNameModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Name</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔒 Change Password</h3>
+                <span class="close" onclick="closeChangePasswordModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password:</label>
+                        <input type="password" id="currentPassword" required placeholder="Enter current password">
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password:</label>
+                        <input type="password" id="newPassword" required placeholder="Enter new password" minlength="6">
+                        <small class="form-help">Password must be at least 6 characters long</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password:</label>
+                        <input type="password" id="confirmPassword" required placeholder="Confirm new password">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="success-message" style="display: none;">
+        <div class="message-content">
+            <span class="success-icon">✅</span>
+            <span id="successText">Operation completed successfully!</span>
+            <button class="close-btn" onclick="hideSuccessMessage()">×</button>
+        </div>
+    </div>
 
     <footer class="footer">
         <p>&copy; 2024 EduTech. All rights reserved.</p>
@@ -224,10 +289,92 @@
             }
         }
 
-        // Edit profile function
-        function editProfile() {
-            alert('Profile editing feature will be implemented soon!');
-            // You can implement a modal or redirect to an edit profile page here
+        // Show edit name modal
+        function showEditNameModal() {
+            const currentUser = getCurrentUser();
+            document.getElementById('newName').value = currentUser.full_name || '';
+            document.getElementById('editNameModal').style.display = 'block';
+        }
+
+        // Close edit name modal
+        function closeEditNameModal() {
+            document.getElementById('editNameModal').style.display = 'none';
+            document.getElementById('editNameForm').reset();
+        }
+
+        // Show change password modal
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'block';
+        }
+
+        // Close change password modal
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+            document.getElementById('changePasswordForm').reset();
+        }
+
+        // Show success message
+        function showSuccessMessage(message) {
+            document.getElementById('successText').textContent = message;
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Auto hide after 5 seconds
+            setTimeout(hideSuccessMessage, 5000);
+        }
+
+        // Hide success message
+        function hideSuccessMessage() {
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        // Update user name
+        async function updateUserName(newName) {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return false;
+
+            try {
+                const success = await clientDB.updateUserName(currentUser.id, newName);
+                if (success) {
+                    // Update local storage and current user data
+                    localStorage.setItem('user_name', newName);
+                    currentUser.full_name = newName;
+                    
+                    // Update UI
+                    document.getElementById('profileName').textContent = newName;
+                    showSuccessMessage('✅ Name updated successfully!');
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error updating user name:', error);
+                return false;
+            }
+        }
+
+        // Change user password
+        async function changeUserPassword(currentPassword, newPassword) {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return false;
+
+            try {
+                // First verify current password
+                const isValid = await clientDB.verifyUserPassword(currentUser.email, currentPassword);
+                if (!isValid) {
+                    alert('❌ Current password is incorrect!');
+                    return false;
+                }
+
+                // Update password
+                const success = await clientDB.updateUserPassword(currentUser.id, newPassword);
+                if (success) {
+                    showSuccessMessage('✅ Password changed successfully!');
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error changing password:', error);
+                return false;
+            }
         }
 
         // Go back to dashboard
@@ -277,6 +424,67 @@
                 console.error('❌ Profile page initialization error:', error);
                 alert('Error loading profile. Please refresh the page.');
             }
+
+            // Edit Name Form Handler
+            document.getElementById('editNameForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const newName = document.getElementById('newName').value.trim();
+                
+                if (!newName) {
+                    alert('Please enter a valid name');
+                    return;
+                }
+
+                const success = await updateUserName(newName);
+                if (success) {
+                    closeEditNameModal();
+                } else {
+                    alert('❌ Failed to update name. Please try again.');
+                }
+            });
+
+            // Change Password Form Handler
+            document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (newPassword.length < 6) {
+                    alert('❌ Password must be at least 6 characters long');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    alert('❌ New passwords do not match');
+                    return;
+                }
+
+                if (currentPassword === newPassword) {
+                    alert('❌ New password must be different from current password');
+                    return;
+                }
+
+                const success = await changeUserPassword(currentPassword, newPassword);
+                if (success) {
+                    closeChangePasswordModal();
+                }
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(event) {
+                const editNameModal = document.getElementById('editNameModal');
+                const changePasswordModal = document.getElementById('changePasswordModal');
+                
+                if (event.target === editNameModal) {
+                    closeEditNameModal();
+                }
+                if (event.target === changePasswordModal) {
+                    closeChangePasswordModal();
+                }
+            });
         });
     </script>
 
@@ -470,6 +678,147 @@
         .no-courses {
             text-align: center;
             padding: 2rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #f1f5f9;
+        }
+
+        .close {
+            color: #94a3b8;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #f1f5f9;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+
+        .form-help {
+            display: block;
+            margin-top: 0.5rem;
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-message .message-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            padding: 0;
+            border: none;
+        }
+
+        .success-icon {
+            font-size: 1.2rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
     <script src="assets/js/central-db.js"></script>
