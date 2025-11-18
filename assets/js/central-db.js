@@ -514,17 +514,24 @@ if (document.readyState === 'loading') {
         clientDB.initializeDefaultAdmin();
     }, 2000);
 }
+
+
 // Update user name
 async function updateUserName(userId, newName) {
     try {
         console.log('Updating user name for:', userId, 'New name:', newName);
         
-        // Get current user data first
+        if (!userId || userId === 'undefined' || userId.includes('undefined')) {
+            console.error('Invalid user ID:', userId);
+            return false;
+        }
+        
+        // Get current user data first to verify user exists
         const userRef = firebase.database().ref('users/' + userId);
         const snapshot = await userRef.once('value');
         
         if (!snapshot.exists()) {
-            console.error('User not found:', userId);
+            console.error('User not found in database:', userId);
             return false;
         }
         
@@ -557,7 +564,9 @@ async function verifyUserPassword(email, password) {
             
             console.log('User found, verifying password...');
             // Simple password check (in real app, use proper hashing)
-            return userData.password === password;
+            const isValid = userData.password === password;
+            console.log('Password verification result:', isValid);
+            return isValid;
         }
         
         console.log('User not found with email:', email);
@@ -572,6 +581,11 @@ async function verifyUserPassword(email, password) {
 async function updateUserPassword(userId, newPassword) {
     try {
         console.log('Updating password for user:', userId);
+        
+        if (!userId || userId === 'undefined' || userId.includes('undefined')) {
+            console.error('Invalid user ID:', userId);
+            return false;
+        }
         
         const userRef = firebase.database().ref('users/' + userId);
         const snapshot = await userRef.once('value');
@@ -595,9 +609,14 @@ async function updateUserPassword(userId, newPassword) {
     }
 }
 
-// Get user by ID
+// Get user by ID with better error handling
 async function getUserById(userId) {
     try {
+        if (!userId || userId === 'undefined') {
+            console.error('Invalid user ID provided:', userId);
+            return null;
+        }
+        
         const userRef = firebase.database().ref('users/' + userId);
         const snapshot = await userRef.once('value');
         
@@ -608,6 +627,7 @@ async function getUserById(userId) {
                 ...userData
             };
         }
+        console.log('User not found with ID:', userId);
         return null;
     } catch (error) {
         console.error('Error getting user by ID:', error);
