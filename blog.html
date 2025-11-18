@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - EduTech</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <div class="loading-bar"></div>
+    
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">EduTech Blog</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
+                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <h1>EduTech Blog</h1>
+            <p>Latest insights, tutorials, and news from the world of technology education</p>
+        </div>
+
+        <div class="card">
+            <div class="blog-grid">
+                <article class="blog-card" onclick="location.href='blog-post1.html'">
+                    <div class="blog-image">
+                        <div class="image-placeholder programming"></div>
+                        <div class="blog-badge">Programming</div>
+                    </div>
+                    <div class="blog-content">
+                        <h3>How to Learn Programming Fast</h3>
+                        <p class="blog-meta">
+                            <span class="author">By Tech Mentor</span>
+                            <span class="date">January 1, 2025</span>
+                            <span class="read-time">5 min read</span>
+                        </p>
+                        <p class="blog-excerpt">Discover effective strategies to accelerate your programming journey and build real-world projects faster than ever before.</p>
+                        <div class="blog-tags">
+                            <span class="tag">Programming</span>
+                            <span class="tag">Learning</span>
+                            <span class="tag">Tips</span>
+                        </div>
+                    </div>
+                    <div class="blog-hover-effect"></div>
+                </article>
+
+                <article class="blog-card" onclick="location.href='blog-post2.html'">
+                    <div class="blog-image">
+                        <div class="image-placeholder seo"></div>
+                        <div class="blog-badge">SEO</div>
+                    </div>
+                    <div class="blog-content">
+                        <h3>Top 10 SEO Tricks for 2025</h3>
+                        <p class="blog-meta">
+                            <span class="author">By Digital Expert</span>
+                            <span class="date">January 5, 2025</span>
+                            <span class="read-time">7 min read</span>
+                        </p>
+                        <p class="blog-excerpt">Master the latest SEO techniques that will dominate search rankings in 2025 and drive organic traffic to your website.</p>
+                        <div class="blog-tags">
+                            <span class="tag">SEO</span>
+                            <span class="tag">Marketing</span>
+                            <span class="tag">Digital</span>
+                        </div>
+                    </div>
+                    <div class="blog-hover-effect"></div>
+                </article>
+
+                <article class="blog-card coming-soon">
+                    <div class="blog-image">
+                        <div class="image-placeholder ai"></div>
+                        <div class="blog-badge">AI</div>
+                    </div>
+                    <div class="blog-content">
+                        <h3>AI in Education: The Future is Here</h3>
+                        <p class="blog-meta">
+                            <span class="author">By AI Specialist</span>
+                            <span class="date">Coming Soon</span>
+                            <span class="read-time">8 min read</span>
+                        </p>
+                        <p class="blog-excerpt">Explore how artificial intelligence is revolutionizing the education sector and creating personalized learning experiences.</p>
+                        <div class="blog-tags">
+                            <span class="tag">AI</span>
+                            <span class="tag">Education</span>
+                            <span class="tag">Future</span>
+                        </div>
+                    </div>
+                    <div class="coming-soon-overlay">
+                        <span>Coming Soon</span>
+                    </div>
+                </article>
+
+                <article class="blog-card coming-soon">
+                    <div class="blog-image">
+                        <div class="image-placeholder webdev"></div>
+                        <div class="blog-badge">Web Dev</div>
+                    </div>
+                    <div class="blog-content">
+                        <h3>Modern Web Development Trends 2025</h3>
+                        <p class="blog-meta">
+                            <span class="author">By Web Architect</span>
+                            <span class="date">Coming Soon</span>
+                            <span class="read-time">6 min read</span>
+                        </p>
+                        <p class="blog-excerpt">Stay ahead of the curve with the latest web development frameworks, tools, and best practices for 2025.</p>
+                        <div class="blog-tags">
+                            <span class="tag">Web Development</span>
+                            <span class="tag">Trends</span>
+                            <span class="tag">Frameworks</span>
+                        </div>
+                    </div>
+                    <div class="coming-soon-overlay">
+                        <span>Coming Soon</span>
+                    </div>
+                </article>
+            </div>
+
+            <div class="blog-newsletter">
+                <div class="newsletter-content">
+                    <h3>📧 Stay Updated</h3>
+                    <p>Get the latest articles and tutorials delivered to your inbox</p>
+                    <div class="newsletter-form">
+                        <input type="email" id="newsletterEmail" placeholder="Enter your email address">
+                        <button class="btn btn-primary" onclick="subscribeNewsletter()">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 EduTech. All rights reserved.</p>
+    </footer>
+
+    <script src="assets/js/auth.js"></script>
+    <script>
+        function subscribeNewsletter() {
+            const email = document.getElementById('newsletterEmail').value;
+            if (email && email.includes('@')) {
+                alert('Thank you for subscribing to our newsletter!');
+                document.getElementById('newsletterEmail').value = '';
+            } else {
+                alert('Please enter a valid email address.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+            
+            // Add animation to blog cards on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                        entry.target.classList.add('animated');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.blog-card').forEach(card => {
+                card.style.animationPlayState = 'paused';
+                observer.observe(card);
+            });
+        });
+    </script>
+
+    <style>
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .blog-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            animation: slideUp 0.6s ease;
+            animation-play-state: paused;
+        }
+
+        .blog-card.animated {
+            animation-play-state: running;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .blog-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(6, 182, 212, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .blog-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .image-placeholder {
+            height: 100%;
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
+            position: relative;
+        }
+
+        .image-placeholder.programming::before {
+            content: "</>";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .image-placeholder.seo::before {
+            content: "🔍";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+        }
+
+        .image-placeholder.ai::before {
+            content: "🤖";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+        }
+
+        .image-placeholder.webdev::before {
+            content: "🌐";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+        }
+
+        .blog-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(6, 182, 212, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .blog-content {
+            padding: 1.5rem;
+        }
+
+        .blog-content h3 {
+            margin-bottom: 1rem;
+            color: #f1f5f9;
+            font-size: 1.3rem;
+            line-height: 1.4;
+        }
+
+        .blog-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            flex-wrap: wrap;
+        }
+
+        .blog-excerpt {
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .blog-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(6, 182, 212, 0.1);
+            color: #06b6d4;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .blog-hover-effect {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .blog-card:hover .blog-hover-effect {
+            left: 100%;
+        }
+
+        .coming-soon {
+            position: relative;
+            opacity: 0.7;
+        }
+
+        .coming-soon-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+            z-index: 2;
+        }
+
+        .coming-soon-overlay span {
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: bold;
+            transform: rotate(-5deg);
+        }
+
+        .blog-newsletter {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.1));
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .newsletter-content {
+            text-align: center;
+        }
+
+        .newsletter-content h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 1rem;
+            max-width: 400px;
+            margin: 1.5rem auto 0;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .newsletter-form {
+                flex-direction: column;
+            }
+        }
+    </style>
+</body>
+</html>

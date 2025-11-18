@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - EduTech</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <div class="loading-bar"></div>
+    
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">EduTech</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
+                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <h1>Contact Us</h1>
+            <p>Get in touch with our team - we're here to help you succeed</p>
+        </div>
+
+        <div class="contact-grid">
+            <div class="contact-info">
+                <div class="contact-card">
+                    <div class="contact-icon">📧</div>
+                    <h3>Email Us</h3>
+                    <p>Send us a message and we'll respond within 24 hours</p>
+                    <a href="mailto:support@edutech.com" class="contact-link">support@edutech.com</a>
+                </div>
+
+                <div class="contact-card">
+                    <div class="contact-icon">📞</div>
+                    <h3>Call Us</h3>
+                    <p>Speak directly with our support team during business hours</p>
+                    <a href="tel:+94112345678" class="contact-link">+94 11 234 5678</a>
+                </div>
+
+                <div class="contact-card">
+                    <div class="contact-icon">💬</div>
+                    <h3>Live Chat</h3>
+                    <p>Get instant help from our online support team</p>
+                    <button class="btn btn-primary" onclick="openChat()">Start Chat</button>
+                </div>
+
+                <div class="contact-card">
+                    <div class="contact-icon">🏢</div>
+                    <h3>Visit Us</h3>
+                    <p>Come see us at our main campus</p>
+                    <address>
+                        123 Education Street<br>
+                        Colombo 00700<br>
+                        Sri Lanka
+                    </address>
+                </div>
+            </div>
+
+            <div class="contact-form-container">
+                <div class="card">
+                    <h2>Send us a Message</h2>
+                    <form class="contact-form" id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required placeholder="Enter your email address">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <select id="subject" name="subject" required>
+                                <option value="">Select a subject</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="billing">Billing Question</option>
+                                <option value="course">Course Information</option>
+                                <option value="partnership">Partnership</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" required placeholder="Tell us how we can help you..." rows="5"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" required>
+                                <span class="checkmark"></span>
+                                I agree to the <a href="#">privacy policy</a> and terms of service
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-section">
+            <div class="card">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h4>How do I reset my password?</h4>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Click on "Forgot Password" on the login page and follow the instructions sent to your email.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h4>Can I download course materials?</h4>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Yes, most course materials are available for download. Look for the download icon in each lesson.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h4>Do you offer certificates?</h4>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Yes, we provide certificates of completion for all courses upon successful finishing.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h4>What payment methods do you accept?</h4>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>We accept credit cards, debit cards, PayPal, and bank transfers for course payments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 EduTech. All rights reserved.</p>
+    </footer>
+
+    <script src="assets/js/auth.js"></script>
+    <script>
+        function openChat() {
+            alert('Live chat feature coming soon! In the meantime, please use our contact form.');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+
+            // Contact form handling
+            document.getElementById('contactForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const name = formData.get('name');
+                const email = formData.get('email');
+                
+                // Simulate form submission
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                
+                submitBtn.textContent = 'Sending...';
+                submitBtn.disabled = true;
+                
+                setTimeout(() => {
+                    alert(`Thank you, ${name}! Your message has been sent successfully. We'll respond to ${email} within 24 hours.`);
+                    this.reset();
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }, 2000);
+            });
+
+            // FAQ toggle functionality
+            document.querySelectorAll('.faq-question').forEach(question => {
+                question.addEventListener('click', function() {
+                    const faqItem = this.parentElement;
+                    const answer = this.nextElementSibling;
+                    const toggle = this.querySelector('.faq-toggle');
+                    
+                    // Close other open FAQs
+                    document.querySelectorAll('.faq-item').forEach(item => {
+                        if (item !== faqItem) {
+                            item.classList.remove('active');
+                            item.querySelector('.faq-toggle').textContent = '+';
+                        }
+                    });
+                    
+                    // Toggle current FAQ
+                    faqItem.classList.toggle('active');
+                    toggle.textContent = faqItem.classList.contains('active') ? '−' : '+';
+                });
+            });
+
+            // Add animations to contact cards
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animated');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.contact-card, .faq-item').forEach(element => {
+                observer.observe(element);
+            });
+        });
+    </script>
+</body>
+</html>

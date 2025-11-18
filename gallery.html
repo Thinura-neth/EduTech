@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - EduTech</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <div class="loading-bar"></div>
+    
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">EduTech Gallery</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
+                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <h1>EduTech Gallery</h1>
+            <p>Explore our student projects, campus life, and learning journey</p>
+        </div>
+
+        <div class="gallery-controls">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All Projects</button>
+                <button class="filter-btn" data-filter="web">Web Development</button>
+                <button class="filter-btn" data-filter="mobile">Mobile Apps</button>
+                <button class="filter-btn" data-filter="design">UI/UX Design</button>
+                <button class="filter-btn" data-filter="data">Data Science</button>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search projects...">
+                <span class="search-icon">🔍</span>
+            </div>
+        </div>
+
+        <div class="gallery-grid" id="galleryGrid">
+            <!-- Projects will be loaded here -->
+        </div>
+
+        <div class="gallery-stats">
+            <div class="stats-card">
+                <h3>🎓 Student Projects Showcase</h3>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <div class="stat-number">150+</div>
+                        <div class="stat-label">Total Projects</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">2,500+</div>
+                        <div class="stat-label">Active Students</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">94%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="submit-project">
+            <div class="card">
+                <h2>🎨 Share Your Project</h2>
+                <p>Have you built something amazing? Share it with the EduTech community!</p>
+                <button class="btn btn-primary" onclick="submitProject()">Submit Your Project</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </main>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="modalContent">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 EduTech. All rights reserved.</p>
+    </footer>
+
+    <script src="assets/js/auth.js"></script>
+    <script>
+        const projects = [
+            {
+                id: 1,
+                title: "E-Commerce Platform",
+                category: "web",
+                description: "Full-stack e-commerce solution with React and Node.js featuring user authentication, product management, shopping cart, and payment integration.",
+                technologies: ["React", "Node.js", "MongoDB", "Express", "Stripe API"],
+                features: ["User Authentication", "Product Management", "Shopping Cart", "Payment Processing", "Order Tracking"],
+                image: "web-project-1",
+                demo: "#",
+                github: "#"
+            },
+            {
+                id: 2,
+                title: "Fitness Tracker App",
+                category: "mobile",
+                description: "Cross-platform mobile application for fitness tracking with workout plans, progress monitoring, and social features.",
+                technologies: ["Flutter", "Dart", "Firebase", "Google Fit API"],
+                features: ["Workout Plans", "Progress Tracking", "Social Features", "Health Integration"],
+                image: "mobile-project-1",
+                demo: "#",
+                github: "#"
+            },
+            {
+                id: 3,
+                title: "Banking App UI",
+                category: "design",
+                description: "Modern banking interface with seamless user experience and intuitive design patterns.",
+                technologies: ["Figma", "UI Design", "Prototyping", "User Research"],
+                features: ["Modern UI", "User Experience", "Prototyping", "Design System"],
+                image: "design-project-1",
+                demo: "#",
+                github: "#"
+            },
+            {
+                id: 4,
+                title: "Sales Analytics Dashboard",
+                category: "data",
+                description: "Interactive dashboard for business intelligence and sales performance analysis.",
+                technologies: ["Python", "Tableau", "SQL", "Pandas"],
+                features: ["Data Visualization", "Business Intelligence", "Performance Analysis", "Real-time Data"],
+                image: "data-project-1",
+                demo: "#",
+                github: "#"
+            },
+            {
+                id: 5,
+                title: "Social Media Platform",
+                category: "web",
+                description: "Real-time social network with Vue.js and Socket.io featuring instant messaging and content sharing.",
+                technologies: ["Vue.js", "Express", "WebSockets", "MongoDB"],
+                features: ["Real-time Chat", "Content Sharing", "User Profiles", "Notifications"],
+                image: "web-project-2",
+                demo: "#",
+                github: "#"
+            },
+            {
+                id: 6,
+                title: "Food Delivery App",
+                category: "mobile",
+                description: "React Native app with real-time order tracking and restaurant management system.",
+                technologies: ["React Native", "Redux", "Google Maps", "Firebase"],
+                features: ["Order Tracking", "Restaurant Management", "Real-time Updates", "Payment Integration"],
+                image: "mobile-project-2",
+                demo: "#",
+                github: "#"
+            },
+            {
+                id: 7,
+                title: "Travel Booking Website",
+                category: "design",
+                description: "Complete travel booking platform design system with user-friendly interface.",
+                technologies: ["Adobe XD", "Design System", "User Research", "Prototyping"],
+                features: ["Booking System", "User Interface", "Design System", "User Research"],
+                image: "design-project-2",
+                demo: "#",
+                github: "#"
+            },
+            {
+                id: 8,
+                title: "COVID-19 Data Analysis",
+                category: "data",
+                description: "Data visualization and predictive modeling for COVID-19 spread analysis.",
+                technologies: ["Pandas", "Matplotlib", "Machine Learning", "Data Analysis"],
+                features: ["Data Visualization", "Predictive Modeling", "Statistical Analysis", "Dashboard"],
+                image: "data-project-2",
+                demo: "#",
+                github: "#"
+            }
+        ];
+
+        function loadGallery() {
+            const galleryGrid = document.getElementById('galleryGrid');
+            
+            galleryGrid.innerHTML = projects.map(project => `
+                <div class="gallery-item" data-category="${project.category}" data-title="${project.title.toLowerCase()}">
+                    <div class="gallery-card">
+                        <div class="project-image ${project.image}"></div>
+                        <div class="project-overlay">
+                            <div class="project-info">
+                                <h3>${project.title}</h3>
+                                <p>${project.description}</p>
+                                <div class="project-tags">
+                                    ${project.technologies.map(tech => `<span>${tech}</span>`).join('')}
+                                </div>
+                            </div>
+                            <button class="view-project-btn" onclick="viewProject(${project.id})">View Project</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animated');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                observer.observe(item);
+            });
+        }
+
+        function viewProject(projectId) {
+            const project = projects.find(p => p.id === projectId);
+            const modal = document.getElementById('projectModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <h2>${project.title}</h2>
+                <div class="project-details">
+                    <p>${project.description}</p>
+                    
+                    <div class="project-specs">
+                        <div class="spec-section">
+                            <h4>🛠️ Technologies Used</h4>
+                            <div class="tech-tags">
+                                ${project.technologies.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="spec-section">
+                            <h4>✨ Key Features</h4>
+                            <ul>
+                                ${project.features.map(feature => `<li>${feature}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="project-links">
+                        <a href="${project.demo}" class="btn btn-primary" target="_blank">Live Demo</a>
+                        <a href="${project.github}" class="btn btn-secondary" target="_blank">GitHub</a>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        function submitProject() {
+            alert('Project submission feature coming soon! In the meantime, please contact us through the contact page.');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+            loadGallery();
+
+            // Gallery filtering
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            const searchInput = document.getElementById('searchInput');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Filter items
+                    galleryItems.forEach(item => {
+                        if (filter === 'all' || item.getAttribute('data-category') === filter) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                galleryItems.forEach(item => {
+                    const title = item.getAttribute('data-title');
+                    if (title.includes(searchTerm)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+
+            // Modal functionality
+            const modal = document.getElementById('projectModal');
+            const closeBtn = document.querySelector('.close-modal');
+
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // Animate stats
+            const stats = document.querySelectorAll('.stat-number');
+            stats.forEach(stat => {
+                const finalValue = stat.textContent;
+                stat.textContent = '0';
+                
+                let current = 0;
+                const increment = finalValue.includes('+') ? 10 : 1;
+                const target = parseFloat(finalValue);
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    stat.textContent = current.toFixed(current % 1 === 0 ? 0 : 0) + (finalValue.includes('+') ? '+' : '%');
+                    
+                    if (current >= target) {
+                        stat.textContent = finalValue;
+                        clearInterval(timer);
+                    }
+                }, 50);
+            });
+        });
+    </script>
+
+    <style>
+        .gallery-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
+            color: white;
+            border-color: transparent;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .gallery-item {
+            opacity: 0;
+            animation: slideUp 0.6s ease;
+            animation-play-state: paused;
+        }
+
+        .gallery-item.animated {
+            animation-play-state: running;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .gallery-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .project-image {
+            height: 200px;
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
+            position: relative;
+        }
+
+        .project-image::before {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .web-project-1::before { content: "🛒"; }
+        .mobile-project-1::before { content: "💪"; }
+        .design-project-1::before { content: "🏦"; }
+        .data-project-1::before { content: "📊"; }
+        .web-project-2::before { content: "👥"; }
+        .mobile-project-2::before { content: "🍕"; }
+        .design-project-2::before { content: "✈️"; }
+        .data-project-2::before { content: "🦠"; }
+
+        .project-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-card:hover .project-overlay {
+            opacity: 1;
+        }
+
+        .project-info h3 {
+            color: #f1f5f9;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .project-info p {
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .project-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .project-tags span {
+            background: rgba(6, 182, 212, 0.2);
+            color: #06b6d4;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .view-project-btn {
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            width: 100%;
+        }
+
+        .view-project-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .gallery-stats {
+            margin: 3rem 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #06b6d4;
+            margin-bottom: 0.5rem;
+        }
+
+        .submit-project {
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .project-details {
+            margin-top: 1rem;
+        }
+
+        .project-specs {
+            margin: 2rem 0;
+        }
+
+        .spec-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .spec-section h4 {
+            color: #06b6d4;
+            margin-bottom: 1rem;
+        }
+
+        .tech-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .tech-tag {
+            background: rgba(6, 182, 212, 0.2);
+            color: #06b6d4;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .project-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: rgba(30, 41, 59, 0.95);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                min-width: auto;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+            
+            .project-links {
+                flex-direction: column;
+            }
+        }
+    </style>
+</body>
+</html>
