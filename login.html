@@ -38,11 +38,11 @@
                     <form id="loginForm">
                         <div class="form-group">
                             <label for="loginEmail">Email Address</label>
-                            <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                            <input type="email" id="loginEmail" placeholder="Enter your email" required autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                            <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="new-password">
                         </div>
                         <button type="submit" class="btn btn-primary" id="loginSubmitBtn">Sign In</button>
                     </form>
@@ -59,15 +59,15 @@
                     <form id="registerForm">
                         <div class="form-group">
                             <label for="registerName">Full Name</label>
-                            <input type="text" id="registerName" placeholder="Enter your full name">
+                            <input type="text" id="registerName" placeholder="Enter your full name" autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label for="registerEmail">Email Address</label>
-                            <input type="email" id="registerEmail" placeholder="Enter your email" required>
+                            <input type="email" id="registerEmail" placeholder="Enter your email" required autocomplete="off">
                         </div>
                         <div class="form-group">
                             <label for="registerPassword">Password</label>
-                            <input type="password" id="registerPassword" placeholder="Create a password (min 6 characters)" required minlength="6">
+                            <input type="password" id="registerPassword" placeholder="Create a password (min 6 characters)" required minlength="6" autocomplete="new-password">
                         </div>
                         <button type="submit" class="btn btn-primary" id="registerSubmitBtn">Create Account</button>
                     </form>
@@ -80,24 +80,21 @@
         <p>&copy; 2024 EduTech. All rights reserved.</p>
     </footer>
 
-    <!-- Scripts එක් තැනකට මාරු කරන්න -->
     <script src="assets/js/central-db.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
         // Tab switching
         function showTab(tabName) {
-            // Update buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
             
-            // Show selected tab
             document.getElementById('loginTab').style.display = tabName === 'login' ? 'block' : 'none';
             document.getElementById('registerTab').style.display = tabName === 'register' ? 'block' : 'none';
         }
 
-        // Login form handler - SIMPLIFIED VERSION
+        // Login form handler
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -106,21 +103,16 @@
             
             console.log('🔄 Login attempt:', email);
             
-            // Show loading state
             const submitBtn = document.getElementById('loginSubmitBtn');
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Signing In...';
             submitBtn.disabled = true;
             
             try {
-                console.log('🔐 Calling login function...');
                 const result = await login(email, password);
-                console.log('📊 Login result:', result);
                 
                 if (result && result.success) {
                     alert('✅ Login successful! Redirecting to dashboard...');
-                    
-                    // Add small delay for better UX
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
                     }, 1000);
@@ -132,13 +124,12 @@
                 console.error('🔥 Login error:', error);
                 alert('❌ Login failed: ' + error.message);
             } finally {
-                // Reset button state
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }
         });
 
-        // Register form handler - SIMPLIFIED VERSION
+        // Register form handler
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -148,16 +139,13 @@
             
             console.log('🔄 Registration attempt:', email);
             
-            // Show loading state
             const submitBtn = document.getElementById('registerSubmitBtn');
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Creating Account...';
             submitBtn.disabled = true;
             
             try {
-                console.log('📝 Calling register function...');
                 const result = await register(email, password, fullName);
-                console.log('📊 Registration result:', result);
                 
                 if (result && result.success) {
                     alert('✅ ' + result.message);
@@ -171,36 +159,15 @@
                 console.error('🔥 Registration error:', error);
                 alert('❌ Registration failed: ' + error.message);
             } finally {
-                // Reset button state
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }
         });
 
-        // Redirect if already logged in
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🏠 Login page loaded');
             updateNavigation();
-            
-            // Debug info
-            console.log('🔧 Debug info:');
-            console.log('- Firebase initialized:', typeof clientDB !== 'undefined' ? clientDB.initialized : 'undefined');
-            console.log('- Login function:', typeof login);
-            console.log('- Register function:', typeof register);
         });
-
-        // Debug function
-        function debugLogin() {
-            console.log('=== LOGIN DEBUG ===');
-            console.log('Email field:', document.getElementById('loginEmail')?.value);
-            console.log('Password field:', document.getElementById('loginPassword')?.value);
-            console.log('Firebase status:', clientDB?.initialized);
-            console.log('Auth functions:', {
-                login: typeof login,
-                register: typeof register,
-                isLoggedIn: typeof isLoggedIn
-            });
-        }
     </script>
 
     <style>
@@ -339,7 +306,6 @@
             animation: pulse 3s ease-in-out infinite;
         }
 
-        /* Loading state */
         .loading {
             position: relative;
             color: transparent !important;
