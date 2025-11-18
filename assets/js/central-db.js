@@ -517,7 +517,23 @@ if (document.readyState === 'loading') {
 // Update user name
 async function updateUserName(userId, newName) {
     try {
-        await firebase.database().ref('users/' + userId + '/full_name').set(newName);
+        console.log('Updating user name for:', userId, 'New name:', newName);
+        
+        // Get current user data first
+        const userRef = firebase.database().ref('users/' + userId);
+        const snapshot = await userRef.once('value');
+        
+        if (!snapshot.exists()) {
+            console.error('User not found:', userId);
+            return false;
+        }
+        
+        // Update the full_name field
+        await userRef.update({
+            full_name: newName,
+            updated_at: new Date().toISOString()
+        });
+        
         console.log('User name updated successfully');
         return true;
     } catch (error) {
@@ -529,15 +545,22 @@ async function updateUserName(userId, newName) {
 // Verify user password
 async function verifyUserPassword(email, password) {
     try {
+        console.log('Verifying password for:', email);
+        
         const usersRef = firebase.database().ref('users');
         const snapshot = await usersRef.orderByChild('email').equalTo(email).once('value');
         
         if (snapshot.exists()) {
-            const userData = Object.values(snapshot.val())[0];
-            // In a real app, you should use proper password hashing
-            // This is a simplified version for demonstration
+            const users = snapshot.val();
+            const userKey = Object.keys(users)[0];
+            const userData = users[userKey];
+            
+            console.log('User found, verifying password...');
+            // Simple password check (in real app, use proper hashing)
             return userData.password === password;
         }
+        
+        console.log('User not found with email:', email);
         return false;
     } catch (error) {
         console.error('Error verifying password:', error);
@@ -548,11 +571,46 @@ async function verifyUserPassword(email, password) {
 // Update user password
 async function updateUserPassword(userId, newPassword) {
     try {
-        await firebase.database().ref('users/' + userId + '/password').set(newPassword);
+        console.log('Updating password for user:', userId);
+        
+        const userRef = firebase.database().ref('users/' + userId);
+        const snapshot = await userRef.once('value');
+        
+        if (!snapshot.exists()) {
+            console.error('User not found:', userId);
+            return false;
+        }
+        
+        // Update the password field
+        await userRef.update({
+            password: newPassword,
+            updated_at: new Date().toISOString()
+        });
+        
         console.log('User password updated successfully');
         return true;
     } catch (error) {
         console.error('Error updating user password:', error);
         return false;
+    }
+}
+
+// Get user by ID
+async function getUserById(userId) {
+    try {
+        const userRef = firebase.database().ref('users/' + userId);
+        const snapshot = await userRef.once('value');
+        
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            return {
+                id: userId,
+                ...userData
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error getting user by ID:', error);
+        return null;
     }
 }
