@@ -263,18 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 
-// Auto-login demo user for testing (optional)
-function autoLoginDemo() {
-    if (!isLoggedIn() && window.location.href.includes('login.html')) {
-        console.log('💡 Auto-filling demo credentials...');
-        const loginEmail = document.getElementById('loginEmail');
-        const loginPassword = document.getElementById('loginPassword');
-        if (loginEmail && loginPassword) {
-            loginEmail.value = 'admin@example.com';
-            loginPassword.value = 'password123';
-        }
-    }
-}
 
 // Debug function to check auth status
 function debugAuth() {
