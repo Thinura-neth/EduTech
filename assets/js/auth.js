@@ -1,275 +1,298 @@
-// assets/js/auth.js - Complete Authentication System
+// assets/js/auth.js - Complete Authentication System (Firebase Only) - නිවැරදි කළ
+let currentUser = null;
 
 // Check if user is logged in
 function isLoggedIn() {
-    const loggedIn = localStorage.getItem('user_id') !== null;
-    console.log('isLoggedIn check:', loggedIn, 'User ID:', localStorage.getItem('user_id'));
-    return loggedIn;
+    const userId = localStorage.getItem('user_id');
+    const userEmail = localStorage.getItem('user_email');
+    
+    if (userId && userEmail) {
+        currentUser = {
+            id: userId,
+            email: userEmail,
+            full_name: localStorage.getItem('user_name') || userEmail.split('@')[0],
+            role: localStorage.getItem('user_role') || 'user',
+            created_at: localStorage.getItem('user_created_at') || new Date().toISOString()
+        };
+        return true;
+    }
+    return false;
 }
 
 // Get current user
 function getCurrentUser() {
-    const userId = localStorage.getItem('user_id');
-    
-    if (!userId) {
-        console.log('No user ID found in localStorage');
-        return null;
+    if (!currentUser) {
+        isLoggedIn(); // Refresh current user data
     }
-
-    console.log('Getting current user with ID:', userId);
-    
-    // For immediate response, we'll create a basic user object from localStorage
-    // The full user data will be loaded from database when needed
-    const user = {
-        id: parseInt(userId),
-        email: localStorage.getItem('user_email') || '',
-        full_name: localStorage.getItem('user_name') || '',
-        role: localStorage.getItem('user_role') || 'user',
-        created_at: localStorage.getItem('user_created_at') || new Date().toISOString()
-    };
-    
-    return user;
+    return currentUser;
 }
 
-// Check if current user is admin
+// Check if user is admin
 function isAdmin() {
     const user = getCurrentUser();
-    const admin = user && user.role === 'admin';
-    console.log('isAdmin check:', admin, 'User role:', user?.role);
-    return admin;
+    return user && user.role === 'admin';
 }
 
-// Login function - FIXED VERSION
-async function login(email, password) {
-    console.log('Login attempt for:', email);
-    
-    if (!email || !password) {
-        return { success: false, message: 'Please fill in all fields' };
+// Require admin access
+function requireAdmin() {
+    if (!isLoggedIn()) {
+        alert('Please login to access this feature.');
+        window.location.href = 'login.html';
+        return false;
     }
     
+    if (!isAdmin()) {
+        alert('Admin privileges required.');
+        return false;
+    }
+    
+    return true;
+}
+
+// Login function - Firebase Only
+async function login(email, password) {
+    console.log('🔐 Firebase login attempt:', email);
+    
+    // Show loading state
+    const submitBtn = document.getElementById('loginSubmitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Signing In...';
+    }
+
     try {
+        // Verify user with Firebase
         const user = await clientDB.verifyUser(email, password);
         
         if (user) {
-            // Store user session in localStorage
-            localStorage.setItem('user_id', user.id.toString());
+            console.log('✅ Login successful:', email);
+            
+            // Store user data in localStorage
+            localStorage.setItem('user_id', user.id);
             localStorage.setItem('user_email', user.email);
             localStorage.setItem('user_name', user.full_name || user.email.split('@')[0]);
             localStorage.setItem('user_role', user.role || 'user');
-            localStorage.setItem('user_created_at', user.created_at);
+            localStorage.setItem('user_created_at', user.created_at || new Date().toISOString());
             
-            console.log('Login successful for user:', user.email);
-            console.log('Stored user data:', {
-                id: localStorage.getItem('user_id'),
-                email: localStorage.getItem('user_email'),
-                name: localStorage.getItem('user_name'),
-                role: localStorage.getItem('user_role')
+            currentUser = user;
+            
+            // Update login info in database
+            await clientDB.updateUser(user.id, {
+                last_login: new Date().toISOString(),
+                login_count: (user.login_count || 0) + 1
             });
-            
+
+            // Log the login action
+            await clientDB.logAction(user, 'LOGIN', 'User logged in successfully');
+
             return {
                 success: true,
-                message: 'Login successful!',
+                message: 'Login successful! Redirecting...',
                 user: user
             };
         } else {
-            console.log('Login failed - invalid credentials for:', email);
+            console.log('❌ Login failed - invalid credentials');
             return {
                 success: false,
-                message: 'Invalid email or password'
+                message: 'Invalid email or password. Please try again.'
             };
         }
+        
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('🔥 Login error:', error);
         return {
             success: false,
-            message: 'Login failed. Please try again.'
+            message: 'Login failed. Please check your connection and try again.'
         };
+    } finally {
+        // Reset button state
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign In';
+        }
     }
 }
 
-// Register function - FIXED VERSION
+// Register function - Firebase Only
 async function register(email, password, fullName = '') {
-    console.log('Registration attempt for:', email);
+    console.log('📝 Firebase registration attempt:', email);
     
-    if (!email || !password) {
-        return { success: false, message: 'Please fill in all required fields' };
+    // Show loading state
+    const submitBtn = document.getElementById('registerSubmitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating Account...';
     }
-    
-    if (password.length < 6) {
-        return { success: false, message: 'Password must be at least 6 characters' };
-    }
-    
+
     try {
+        // Create user with Firebase
         const user = await clientDB.createUser(email, password, fullName);
         
         if (user) {
-            console.log('Registration successful for user:', user.email);
+            console.log('✅ Registration successful:', email);
+            
+            // Store user data in localStorage and auto-login
+            localStorage.setItem('user_id', user.id);
+            localStorage.setItem('user_email', user.email);
+            localStorage.setItem('user_name', user.full_name);
+            localStorage.setItem('user_role', user.role);
+            localStorage.setItem('user_created_at', user.created_at);
+            
+            currentUser = user;
+
             return {
                 success: true,
-                message: 'Registration successful! You can now login.',
+                message: 'Registration successful! You are now logged in.',
                 user: user
             };
         } else {
-            console.log('Registration failed - user already exists:', email);
+            console.log('❌ Registration failed - user might already exist');
             return {
                 success: false,
-                message: 'User already exists with this email'
+                message: 'Registration failed. This email might already be registered.'
             };
         }
+        
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('🔥 Registration error:', error);
         return {
             success: false,
             message: 'Registration failed. Please try again.'
         };
+    } finally {
+        // Reset button state
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Account';
+        }
     }
 }
 
 // Logout function
 function logout() {
-    console.log('Logging out user:', localStorage.getItem('user_email'));
+    const user = getCurrentUser();
+    console.log('🚪 Logging out user:', user?.email);
     
-    // Clear all user data from localStorage
+    // Log the logout action
+    if (user) {
+        clientDB.logAction(user, 'LOGOUT', 'User logged out');
+    }
+    
+    // Clear localStorage
     localStorage.removeItem('user_id');
     localStorage.removeItem('user_email');
     localStorage.removeItem('user_name');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_created_at');
     
-    console.log('Logout successful, redirecting to login page');
-    window.location.href = 'login.html';
+    currentUser = null;
+    
+    // Redirect to home page
+    window.location.href = 'index.html';
 }
 
 // Update navigation based on login status
 function updateNavigation() {
-    const loginBtn = document.getElementById('loginLink');
-    const logoutBtn = document.querySelector('.logout-btn');
+    const loginLink = document.getElementById('loginLink');
     const userWelcome = document.getElementById('userWelcome');
+    const logoutBtn = document.querySelector('.logout-btn');
     const adminLink = document.getElementById('adminLink');
-    
-    console.log('Updating navigation, isLoggedIn:', isLoggedIn());
     
     if (isLoggedIn()) {
         const user = getCurrentUser();
-        console.log('User logged in:', user);
+        const userName = user.full_name || user.email.split('@')[0];
         
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'block';
+        // Show user welcome and logout button
         if (userWelcome) {
-            userWelcome.textContent = `Welcome, ${user.full_name || user.email.split('@')[0]}`;
-            userWelcome.style.display = 'inline-block';
+            userWelcome.textContent = `Welcome, ${userName}`;
+            userWelcome.style.display = 'inline';
         }
-        // Show admin link only for admin users
-        if (adminLink) {
-            adminLink.style.display = isAdmin() ? 'inline-block' : 'none';
-            console.log('Admin link display:', adminLink.style.display);
-        }
-    } else {
-        console.log('User not logged in, showing login button');
-        if (loginBtn) loginBtn.style.display = 'inline-block';
-        if (logoutBtn) logoutBtn.style.display = 'none';
-        if (userWelcome) userWelcome.style.display = 'none';
-        if (adminLink) adminLink.style.display = 'none';
-    }
-}
-
-// Protect pages that require login
-function requireAuth() {
-    if (!isLoggedIn()) {
-        console.log('Authentication required - redirecting to login');
-        alert('Please login to access this page.');
-        window.location.href = 'login.html';
-        return false;
-    }
-    console.log('Authentication successful');
-    return true;
-}
-
-// Protect admin pages
-function requireAdmin() {
-    if (!requireAuth()) {
-        return false;
-    }
-    
-    if (!isAdmin()) {
-        console.log('Admin access denied for user:', getCurrentUser()?.email);
-        alert('Access denied. Admin privileges required.');
-        window.location.href = 'dashboard.html';
-        return false;
-    }
-    
-    console.log('Admin access granted');
-    return true;
-}
-
-// Delete user account (admin only)
-async function deleteUserAccount(userId) {
-    if (!requireAdmin()) return false;
-    
-    // Prevent self-deletion
-    const currentUser = getCurrentUser();
-    if (currentUser && currentUser.id === userId) {
-        alert('You cannot delete your own account!');
-        return false;
-    }
-    
-    if (confirm('Are you sure you want to delete this user account? This action cannot be undone!')) {
-        const success = await clientDB.deleteUser(userId);
-        if (success) {
-            alert('User account deleted successfully!');
-            return true;
-        } else {
-            alert('Failed to delete user account.');
-            return false;
-        }
-    }
-    return false;
-}
-
-// Download user accounts (admin only)
-async function downloadUserAccounts() {
-    if (!requireAdmin()) return;
-    await clientDB.downloadUserAccounts();
-}
-
-// Get user statistics
-async function getUserStats() {
-    try {
-        const users = await clientDB.getUsers();
-        const logs = await clientDB.getUserLogs();
         
-        return {
-            totalUsers: users.length,
-            totalLogs: logs.length,
-            lastRegistration: logs.length > 0 ? new Date(logs[logs.length - 1].logged_at) : null
-        };
-    } catch (error) {
-        console.error('Error getting user stats:', error);
-        return {
-            totalUsers: 0,
-            totalLogs: 0,
-            lastRegistration: null
-        };
+        if (logoutBtn) {
+            logoutBtn.style.display = 'inline-block';
+        }
+        
+        // Hide login link
+        if (loginLink) {
+            loginLink.style.display = 'none';
+        }
+        
+        // Show admin link if user is admin
+        if (adminLink && user.role === 'admin') {
+            adminLink.style.display = 'inline';
+        }
+
+        console.log('✅ Navigation updated for logged in user:', userName);
+    } else {
+        // Show login link, hide user info
+        if (loginLink) {
+            loginLink.style.display = 'inline';
+        }
+        
+        if (userWelcome) {
+            userWelcome.style.display = 'none';
+        }
+        
+        if (logoutBtn) {
+            logoutBtn.style.display = 'none';
+        }
+        
+        if (adminLink) {
+            adminLink.style.display = 'none';
+        }
+
+        console.log('✅ Navigation updated for guest user');
     }
 }
 
-// Initialize when page loads
+// Initialize auth system when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Auth system initializing...');
-    updateNavigation();
+    console.log('🔐 Auth system initializing...');
+    
+    // Wait a bit for Firebase to initialize
+    setTimeout(() => {
+        updateNavigation();
+        
+        // Debug info
+        if (isLoggedIn()) {
+            console.log('✅ User is logged in:', getCurrentUser());
+        } else {
+            console.log('❌ No user logged in');
+            console.log('💡 Demo credentials: admin@example.com / password123');
+        }
+    }, 1000);
 });
 
-// Debug function to check authentication state
+// Auto-login demo user for testing (optional)
+function autoLoginDemo() {
+    if (!isLoggedIn() && window.location.href.includes('login.html')) {
+        console.log('💡 Auto-filling demo credentials...');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        if (loginEmail && loginPassword) {
+            loginEmail.value = 'admin@example.com';
+            loginPassword.value = 'password123';
+        }
+    }
+}
+
+// Debug function to check auth status
 function debugAuth() {
-    console.log('=== AUTH DEBUG INFO ===');
-    console.log('isLoggedIn:', isLoggedIn());
+    console.log('=== AUTH DEBUG ===');
     console.log('Current User:', getCurrentUser());
-    console.log('isAdmin:', isAdmin());
+    console.log('Is Logged In:', isLoggedIn());
+    console.log('Is Admin:', isAdmin());
+    console.log('Firebase Initialized:', clientDB.initialized);
     console.log('LocalStorage:', {
         user_id: localStorage.getItem('user_id'),
         user_email: localStorage.getItem('user_email'),
         user_name: localStorage.getItem('user_name'),
-        user_role: localStorage.getItem('user_role')
+        user_role: localStorage.getItem('user_role'),
+        user_created_at: localStorage.getItem('user_created_at')
     });
-    console.log('=====================');
+}
+
+// Call auto-login on login page
+if (window.location.href.includes('login.html')) {
+    document.addEventListener('DOMContentLoaded', autoLoginDemo);
 }
