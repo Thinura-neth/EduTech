@@ -371,3 +371,168 @@
         flex-direction: column;
     }
 }
+/* assets/css/gallery.css - Complete Gallery Styles */
+.gallery-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: linear-gradient(135deg, #06b6d4, #7c3aed);
+    color: white;
+    border-color: transparent;
+}
+
+.search-box {
+    position: relative;
+    min-width: 250px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.gallery-item {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+.gallery-item.animated {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gallery-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gallery-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+.project-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.project-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gallery-card:hover .project-overlay {
+    opacity: 1;
+}
+
+.project-info h3 {
+    color: #f1f5f9;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.project-info p {
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.project-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.project-tags span {
+    background: rgba(6, 182, 212, 0.2);
+    color: #06b6d4;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.view-project-btn {
+    background: linear-gradient(135deg, #06b6d4, #7c3aed);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+    width: 100%;
+}
+
+.view-project-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Add the rest of your gallery styles from the original file */
