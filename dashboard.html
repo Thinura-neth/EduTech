@@ -278,14 +278,9 @@
         }
 
         // View user profile
-        function viewProfile() {
-            const user = getCurrentUser();
-            if (user) {
-                alert(`👤 Profile Information:\n\nName: ${user.full_name || 'Not set'}\nEmail: ${user.email}\nRole: ${user.role}\nMember since: ${new Date(user.created_at).toLocaleDateString()}`);
-            } else {
-                alert('User information not available.');
-            }
-        }
+function viewProfile() {
+    window.location.href = 'profile.html';
+}
 
         // Browse courses
         function browseCourses() {

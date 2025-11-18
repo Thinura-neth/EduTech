@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - EduTech</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="loading-bar"></div>
+    
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">EduTech</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
+                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div id="authMessage" class="auth-message" style="display: none;">
+            <div class="message-content">
+                <h2>🔐 Please Login to View Profile</h2>
+                <p>You need to be logged in to view your profile information.</p>
+                <a href="login.html" class="btn btn-primary">Login Now</a>
+                <p class="text-muted mt-2">Don't have an account? <a href="login.html" style="color: #06b6d4;">Register here</a></p>
+            </div>
+        </div>
+
+        <div id="profileContent" style="display: none;">
+            <div class="profile-header">
+                <h1>👤 My Profile</h1>
+                <p>Manage your account information and track your learning journey</p>
+            </div>
+
+            <div class="profile-grid">
+                <div class="main-content">
+                    <div class="card">
+                        <h3>📋 Personal Information</h3>
+                        <div class="profile-info">
+                            <div class="info-item">
+                                <label>Full Name:</label>
+                                <span id="profileName">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Email:</label>
+                                <span id="profileEmail">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Role:</label>
+                                <span id="profileRole">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Member Since:</label>
+                                <span id="profileJoinDate">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>User ID:</label>
+                                <span id="profileUserId">Loading...</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="editProfile()" style="margin-top: 1rem;">Edit Profile</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>📊 Learning Statistics</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number" id="profileEnrolledCount">0</div>
+                                <div class="stat-label">Courses Enrolled</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="profileProgressAvg">0%</div>
+                                <div class="stat-label">Average Progress</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="profileCompletedCount">0</div>
+                                <div class="stat-label">Courses Completed</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="profileLearningHours">0</div>
+                                <div class="stat-label">Learning Hours</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="card">
+                        <h3>🎓 Recent Courses</h3>
+                        <div id="profileCourses">
+                            <div class="loading-courses">Loading your courses...</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>⚡ Quick Actions</h3>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="goToDashboard()">Back to Dashboard</button>
+                            <button class="btn btn-secondary" onclick="browseCourses()">Browse Courses</button>
+                            <button class="btn btn-secondary" onclick="contactSupport()">Contact Support</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 EduTech. All rights reserved.</p>
+    </footer>
+
+    <script src="assets/js/database.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        // Load profile information
+        async function loadProfileInfo() {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+
+            try {
+                // Update personal information
+                document.getElementById('profileName').textContent = currentUser.full_name || 'Not set';
+                document.getElementById('profileEmail').textContent = currentUser.email;
+                document.getElementById('profileRole').textContent = currentUser.role;
+                document.getElementById('profileJoinDate').textContent = new Date(currentUser.created_at).toLocaleDateString();
+                document.getElementById('profileUserId').textContent = currentUser.id;
+                
+                console.log('Profile info loaded for user:', currentUser.id);
+            } catch (error) {
+                console.error('Error loading profile info:', error);
+            }
+        }
+
+        // Update profile statistics
+        async function updateProfileStats() {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+
+            try {
+                const userCourses = await clientDB.getUserEnrolledCourses(currentUser.id);
+                const enrolledCount = userCourses.length;
+                const completedCount = userCourses.filter(course => course.progress_percentage === 100).length;
+                const progressAvg = userCourses.length > 0 
+                    ? Math.round(userCourses.reduce((sum, course) => sum + course.progress_percentage, 0) / userCourses.length)
+                    : 0;
+                
+                // Calculate total learning hours (estimate based on course duration and progress)
+                let learningHours = 0;
+                userCourses.forEach(course => {
+                    const courseHours = course.duration_hours || 0;
+                    const progress = course.progress_percentage || 0;
+                    learningHours += (courseHours * progress) / 100;
+                });
+                learningHours = Math.round(learningHours);
+
+                document.getElementById('profileEnrolledCount').textContent = enrolledCount;
+                document.getElementById('profileCompletedCount').textContent = completedCount;
+                document.getElementById('profileProgressAvg').textContent = progressAvg + '%';
+                document.getElementById('profileLearningHours').textContent = learningHours;
+                
+                console.log('Profile stats updated:', { enrolledCount, completedCount, progressAvg, learningHours });
+            } catch (error) {
+                console.error('Error updating profile stats:', error);
+                // Set default values if error
+                document.getElementById('profileEnrolledCount').textContent = '0';
+                document.getElementById('profileCompletedCount').textContent = '0';
+                document.getElementById('profileProgressAvg').textContent = '0%';
+                document.getElementById('profileLearningHours').textContent = '0';
+            }
+        }
+
+        // Load user's courses for profile
+        async function loadProfileCourses() {
+            const currentUser = getCurrentUser();
+            if (!currentUser) return;
+
+            const profileCoursesContainer = document.getElementById('profileCourses');
+            
+            try {
+                const userCourses = await clientDB.getUserEnrolledCourses(currentUser.id);
+                
+                if (userCourses.length === 0) {
+                    profileCoursesContainer.innerHTML = `
+                        <div class="no-courses">
+                            <p style="text-align: center; color: #94a3b8;">No courses enrolled yet.</p>
+                            <button class="btn btn-small" onclick="browseCourses()" style="margin-top: 1rem; width: 100%;">Browse Courses</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Show only recent courses (max 5)
+                const recentCourses = userCourses.slice(0, 5);
+                
+                profileCoursesContainer.innerHTML = recentCourses.map(course => `
+                    <div class="profile-course-item">
+                        <div class="course-title">${course.title}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${course.progress_percentage}%"></div>
+                        </div>
+                        <div class="progress-text">${course.progress_percentage}% Complete</div>
+                    </div>
+                `).join('');
+                
+                // Show "View All" button if there are more courses
+                if (userCourses.length > 5) {
+                    profileCoursesContainer.innerHTML += `
+                        <button class="btn btn-small" onclick="goToDashboard()" style="width: 100%; margin-top: 1rem;">View All Courses</button>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading profile courses:', error);
+                profileCoursesContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Error loading your courses.</p>';
+            }
+        }
+
+        // Edit profile function
+        function editProfile() {
+            alert('Profile editing feature will be implemented soon!');
+            // You can implement a modal or redirect to an edit profile page here
+        }
+
+        // Go back to dashboard
+        function goToDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+
+        // Browse courses
+        function browseCourses() {
+            window.location.href = 'courses.html';
+        }
+
+        // Contact support
+        function contactSupport() {
+            window.location.href = 'contact.html';
+        }
+
+        // Initialize profile page
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('👤 Profile page loading...');
+            
+            // Update navigation first
+            updateNavigation();
+            
+            // Check if user is logged in
+            if (!isLoggedIn()) {
+                console.log('❌ User not logged in, showing auth message');
+                document.getElementById('authMessage').style.display = 'block';
+                document.getElementById('profileContent').style.display = 'none';
+                return;
+            }
+
+            console.log('✅ User is logged in, loading profile content');
+            
+            // User is logged in, show profile content
+            document.getElementById('authMessage').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'block';
+            
+            // Load profile content
+            try {
+                console.log('📊 Loading profile components...');
+                await loadProfileInfo();
+                await loadProfileCourses();
+                await updateProfileStats();
+                console.log('✅ Profile page loaded successfully');
+            } catch (error) {
+                console.error('❌ Profile page initialization error:', error);
+                alert('Error loading profile. Please refresh the page.');
+            }
+        });
+    </script>
+
+    <style>
+        .auth-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60vh;
+            text-align: center;
+        }
+
+        .message-content {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 16px;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            max-width: 500px;
+        }
+
+        .message-content h2 {
+            color: #06b6d4;
+            margin-bottom: 1rem;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+        }
+
+        .profile-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-item label {
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        .info-item span {
+            color: #f1f5f9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #06b6d4;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .profile-course-item {
+            padding: 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .course-title {
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+            color: #f1f5f9;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #475569, #64748b);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+        }
+
+        .loading-courses {
+            text-align: center;
+            color: #94a3b8;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        .no-courses {
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+    <script src="assets/js/central-db.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>
