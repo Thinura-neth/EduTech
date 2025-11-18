@@ -514,3 +514,45 @@ if (document.readyState === 'loading') {
         clientDB.initializeDefaultAdmin();
     }, 2000);
 }
+// Update user name
+async function updateUserName(userId, newName) {
+    try {
+        await firebase.database().ref('users/' + userId + '/full_name').set(newName);
+        console.log('User name updated successfully');
+        return true;
+    } catch (error) {
+        console.error('Error updating user name:', error);
+        return false;
+    }
+}
+
+// Verify user password
+async function verifyUserPassword(email, password) {
+    try {
+        const usersRef = firebase.database().ref('users');
+        const snapshot = await usersRef.orderByChild('email').equalTo(email).once('value');
+        
+        if (snapshot.exists()) {
+            const userData = Object.values(snapshot.val())[0];
+            // In a real app, you should use proper password hashing
+            // This is a simplified version for demonstration
+            return userData.password === password;
+        }
+        return false;
+    } catch (error) {
+        console.error('Error verifying password:', error);
+        return false;
+    }
+}
+
+// Update user password
+async function updateUserPassword(userId, newPassword) {
+    try {
+        await firebase.database().ref('users/' + userId + '/password').set(newPassword);
+        console.log('User password updated successfully');
+        return true;
+    } catch (error) {
+        console.error('Error updating user password:', error);
+        return false;
+    }
+}
