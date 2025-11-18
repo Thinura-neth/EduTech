@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="firebase-config.js"></script>
 </head>
 <body>
     <div class="loading-bar"></div>
@@ -77,7 +80,8 @@
         <p>&copy; 2024 EduTech. All rights reserved.</p>
     </footer>
 
-    <script src="assets/js/database.js"></script>
+    <!-- Scripts එක් තැනකට මාරු කරන්න -->
+    <script src="assets/js/central-db.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
         // Tab switching
@@ -93,12 +97,14 @@
             document.getElementById('registerTab').style.display = tabName === 'register' ? 'block' : 'none';
         }
 
-        // Login form handler
+        // Login form handler - SIMPLIFIED VERSION
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
+            
+            console.log('🔄 Login attempt:', email);
             
             // Show loading state
             const submitBtn = document.getElementById('loginSubmitBtn');
@@ -107,9 +113,11 @@
             submitBtn.disabled = true;
             
             try {
+                console.log('🔐 Calling login function...');
                 const result = await login(email, password);
+                console.log('📊 Login result:', result);
                 
-                if (result.success) {
+                if (result && result.success) {
                     alert('✅ Login successful! Redirecting to dashboard...');
                     
                     // Add small delay for better UX
@@ -117,27 +125,28 @@
                         window.location.href = 'dashboard.html';
                     }, 1000);
                 } else {
-                    alert('❌ ' + result.message);
-                    // Reset button state
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
+                    const errorMsg = result ? result.message : 'Unknown error occurred';
+                    alert('❌ ' + errorMsg);
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                alert('❌ Login failed. Please try again.');
+                console.error('🔥 Login error:', error);
+                alert('❌ Login failed: ' + error.message);
+            } finally {
                 // Reset button state
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }
         });
 
-        // Register form handler
+        // Register form handler - SIMPLIFIED VERSION
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
             const fullName = document.getElementById('registerName').value;
+            
+            console.log('🔄 Registration attempt:', email);
             
             // Show loading state
             const submitBtn = document.getElementById('registerSubmitBtn');
@@ -146,18 +155,21 @@
             submitBtn.disabled = true;
             
             try {
+                console.log('📝 Calling register function...');
                 const result = await register(email, password, fullName);
+                console.log('📊 Registration result:', result);
                 
-                if (result.success) {
+                if (result && result.success) {
                     alert('✅ ' + result.message);
                     showTab('login');
                     document.getElementById('registerForm').reset();
                 } else {
-                    alert('❌ ' + result.message);
+                    const errorMsg = result ? result.message : 'Registration failed';
+                    alert('❌ ' + errorMsg);
                 }
             } catch (error) {
-                console.error('Registration error:', error);
-                alert('❌ Registration failed. Please try again.');
+                console.error('🔥 Registration error:', error);
+                alert('❌ Registration failed: ' + error.message);
             } finally {
                 // Reset button state
                 submitBtn.textContent = originalText;
@@ -167,27 +179,37 @@
 
         // Redirect if already logged in
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏠 Login page loaded');
             updateNavigation();
             
-            if (isLoggedIn()) {
-                alert('You are already logged in! Redirecting to dashboard...');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
-            }
+            // Auto-fill demo credentials
+            setTimeout(() => {
+                const loginEmail = document.getElementById('loginEmail');
+                const loginPassword = document.getElementById('loginPassword');
+                if (loginEmail && loginPassword) {
+                    loginEmail.value = 'admin@example.com';
+                    loginPassword.value = 'password123';
+                    console.log('✅ Demo credentials auto-filled');
+                }
+            }, 500);
+
+            // Debug info
+            console.log('🔧 Debug info:');
+            console.log('- Firebase initialized:', typeof clientDB !== 'undefined' ? clientDB.initialized : 'undefined');
+            console.log('- Login function:', typeof login);
+            console.log('- Register function:', typeof register);
         });
 
         // Debug function
-        function debugAuth() {
-            console.log('Current auth state:', {
-                isLoggedIn: isLoggedIn(),
-                currentUser: getCurrentUser(),
-                localStorage: {
-                    user_id: localStorage.getItem('user_id'),
-                    user_email: localStorage.getItem('user_email'),
-                    user_name: localStorage.getItem('user_name'),
-                    user_role: localStorage.getItem('user_role')
-                }
+        function debugLogin() {
+            console.log('=== LOGIN DEBUG ===');
+            console.log('Email field:', document.getElementById('loginEmail')?.value);
+            console.log('Password field:', document.getElementById('loginPassword')?.value);
+            console.log('Firebase status:', clientDB?.initialized);
+            console.log('Auth functions:', {
+                login: typeof login,
+                register: typeof register,
+                isLoggedIn: typeof isLoggedIn
             });
         }
     </script>

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="firebase-config.js"></script>
 </head>
 <body>
     <div class="loading-bar"></div>
@@ -168,7 +171,7 @@
         <p>&copy; 2024 EduTech. All rights reserved.</p>
     </footer>
 
-    <script src="assets/js/database.js"></script>
+    <script src="assets/js/central-db.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
         let selectedUsers = new Set();
@@ -223,9 +226,9 @@
                 }
 
                 userList.innerHTML = users.map(user => `
-                    <div class="user-item ${selectedUsers.has(user.id) ? 'selected' : ''}" onclick="toggleUserSelection(${user.id}, event)">
+                    <div class="user-item ${selectedUsers.has(user.id) ? 'selected' : ''}" onclick="toggleUserSelection('${user.id}', event)">
                         <div class="user-checkbox">
-                            <input type="checkbox" id="user_${user.id}" ${selectedUsers.has(user.id) ? 'checked' : ''} onchange="toggleUserSelection(${user.id})">
+                            <input type="checkbox" id="user_${user.id}" ${selectedUsers.has(user.id) ? 'checked' : ''} onchange="toggleUserSelection('${user.id}')">
                         </div>
                         <div class="user-avatar ${user.role === 'admin' ? 'admin-avatar' : ''}">
                             ${user.email.charAt(0).toUpperCase()}
@@ -241,11 +244,11 @@
                             <div class="user-date">${new Date(user.created_at).toLocaleDateString()}</div>
                         </div>
                         <div class="user-actions">
-                            <button class="btn-action view-btn" onclick="showUserDetails(${user.id})" title="View Details">
+                            <button class="btn-action view-btn" onclick="showUserDetails('${user.id}')" title="View Details">
                                 👁️
                             </button>
                             ${user.role !== 'admin' ? `
-                                <button class="btn-action delete-btn" onclick="deleteSingleUser(${user.id})" title="Delete User">
+                                <button class="btn-action delete-btn" onclick="deleteSingleUser('${user.id}')" title="Delete User">
                                     🗑️
                                 </button>
                             ` : `
