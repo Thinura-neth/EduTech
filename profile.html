@@ -333,7 +333,10 @@
             if (!currentUser) return false;
 
             try {
-                const success = await clientDB.updateUserName(currentUser.id, newName);
+               const success = await clientDB.updateUser(currentUser.id, {
+                     full_name: newName,
+                     updated_at: new Date().toISOString()
+               });
                 if (success) {
                     // Update local storage and current user data
                     localStorage.setItem('user_name', newName);
