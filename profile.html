@@ -187,6 +187,97 @@
     <script src="assets/js/central-db.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
+        // Smart Profile Management System
+        class ProfileManager {
+            constructor() {
+                this.refreshDelay = 2000;
+            }
+            
+            // Update single UI element
+            updateUIElement(elementId, value) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = value;
+                }
+            }
+            
+            // Refresh all profile data from database
+            async refreshProfileData() {
+                try {
+                    const currentUser = getCurrentUser();
+                    if (!currentUser) return false;
+                    
+                    console.log('🔄 Refreshing profile data...');
+                    
+                    // Get fresh data from database
+                    const freshData = await clientDB.getUserById(currentUser.id);
+                    if (!freshData) {
+                        console.error('User data not found');
+                        return false;
+                    }
+                    
+                    // Update current user object
+                    Object.assign(currentUser, freshData);
+                    
+                    // Update localStorage
+                    localStorage.setItem('user_name', freshData.full_name);
+                    localStorage.setItem('user_email', freshData.email);
+                    localStorage.setItem('user_role', freshData.role);
+                    
+                    // Update all UI elements
+                    this.updateUIElement('profileName', freshData.full_name || 'Not set');
+                    this.updateUIElement('profileEmail', freshData.email);
+                    this.updateUIElement('profileRole', freshData.role);
+                    this.updateUIElement('profileJoinDate', new Date(freshData.created_at).toLocaleDateString());
+                    this.updateUIElement('profileUserId', freshData.id);
+                    
+                    // Update navigation
+                    updateNavigation();
+                    
+                    // Refresh statistics and courses
+                    await updateProfileStats();
+                    await loadProfileCourses();
+                    
+                    console.log('✅ Profile data refreshed successfully');
+                    return true;
+                    
+                } catch (error) {
+                    console.error('❌ Error refreshing profile data:', error);
+                    return false;
+                }
+            }
+            
+            // Show success message with smart refresh
+            showSmartSuccess(message) {
+                const successElement = document.getElementById('successMessage');
+                const successText = document.getElementById('successText');
+                
+                // Show initial message
+                successText.textContent = message;
+                successElement.style.display = 'block';
+                
+                // Start refresh process after delay
+                setTimeout(async () => {
+                    const refreshSuccess = await this.refreshProfileData();
+                    
+                    if (refreshSuccess) {
+                        successText.textContent = '✅ ' + message + ' - All data updated!';
+                    } else {
+                        successText.textContent = '⚠️ ' + message + ' - Some data may need manual refresh';
+                    }
+                    
+                    // Hide message after additional delay
+                    setTimeout(() => {
+                        successElement.style.display = 'none';
+                    }, 3000);
+                    
+                }, this.refreshDelay);
+            }
+        }
+
+        // Initialize profile manager
+        const profileManager = new ProfileManager();
+
         // Load profile information
         async function loadProfileInfo() {
             const currentUser = getCurrentUser();
@@ -377,52 +468,44 @@
                 alert('Error loading profile. Please refresh the page.');
             }
 
-            // Edit Name Form Handler - CORRECTED VERSION
-// Edit Name Form Handler - CORRECTED VERSION
-document.getElementById('editNameForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const nameInput = document.getElementById('newName');
-    const newName = nameInput.value.trim();
-    
-    console.log('🔄 Updating name to:', newName);
-    
-    if (!newName) {
-        alert('Please enter a valid name');
-        return;
-    }
+            // Edit Name Form Handler - SMART REFRESH VERSION
+            document.getElementById('editNameForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const nameInput = document.getElementById('newName');
+                const newName = nameInput.value.trim();
+                
+                if (!newName) {
+                    alert('Please enter a valid name');
+                    return;
+                }
 
-    try {
-        const currentUser = getCurrentUser();
-        console.log('Updating user:', currentUser.id);
-        
-        // Use the CORRECT function - clientDB.updateUser
-        const success = await clientDB.updateUser(currentUser.id, {
-            full_name: newName,
-            updated_at: new Date().toISOString()
-        });
-        
-        console.log('Update result:', success);
-        
-        if (success) {
-            // Update local storage
-            localStorage.setItem('user_name', newName);
-            // Update current user object
-            currentUser.full_name = newName;
-            // Update UI
-            document.getElementById('profileName').textContent = newName;
-            
-            showSuccessMessage('✅ Name updated successfully!');
-            closeEditNameModal();
-        } else {
-            alert('❌ Failed to update name. Please try again.');
-        }
-    } catch (error) {
-        console.error('Error updating name:', error);
-        alert('❌ Error updating name: ' + error.message);
-    }
-});
-            // Change Password Form Handler - CORRECTED VERSION
+                try {
+                    const currentUser = getCurrentUser();
+                    const success = await clientDB.updateUser(currentUser.id, {
+                        full_name: newName,
+                        updated_at: new Date().toISOString()
+                    });
+                    
+                    if (success) {
+                        // Immediate UI update for better UX
+                        localStorage.setItem('user_name', newName);
+                        currentUser.full_name = newName;
+                        document.getElementById('profileName').textContent = newName;
+                        updateNavigation();
+                        
+                        closeEditNameModal();
+                        profileManager.showSmartSuccess('Name updated successfully');
+                    } else {
+                        alert('❌ Failed to update name');
+                    }
+                } catch (error) {
+                    console.error('Error updating name:', error);
+                    alert('❌ Error updating name');
+                }
+            });
+
+            // Change Password Form Handler - SMART REFRESH VERSION
             document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
@@ -461,14 +544,14 @@ document.getElementById('editNameForm').addEventListener('submit', async functio
                     });
                     
                     if (success) {
-                        showSuccessMessage('✅ Password changed successfully!');
                         closeChangePasswordModal();
+                        profileManager.showSmartSuccess('Password changed successfully');
                     } else {
-                        alert('❌ Failed to change password. Please try again.');
+                        alert('❌ Failed to change password');
                     }
                 } catch (error) {
                     console.error('Error changing password:', error);
-                    alert('❌ Error changing password. Please try again.');
+                    alert('❌ Error changing password');
                 }
             });
 
