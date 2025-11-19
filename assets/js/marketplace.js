@@ -169,7 +169,7 @@ class Marketplace {
                 <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
                 <h3>No Ads Available</h3>
                 <p>Be the first to post an ad in the marketplace!</p>
-                <a href="post-ad.html" class="btn btn-primary" style="margin-top: 1rem;">
+                <a href="../../post-ad.html" class="btn btn-primary" style="margin-top: 1rem;">
                     <i class="fas fa-plus"></i> Post Your Ad
                 </a>
             </div>
