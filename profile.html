@@ -378,44 +378,50 @@
             }
 
             // Edit Name Form Handler - CORRECTED VERSION
-            document.getElementById('editNameForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const nameInput = document.getElementById('newName');
-                const newName = nameInput.value.trim();
-                
-                console.log('🔄 Updating name to:', newName);
-                
-                if (!newName) {
-                    alert('Please enter a valid name');
-                    return;
-                }
+// Edit Name Form Handler - CORRECTED VERSION
+document.getElementById('editNameForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const nameInput = document.getElementById('newName');
+    const newName = nameInput.value.trim();
+    
+    console.log('🔄 Updating name to:', newName);
+    
+    if (!newName) {
+        alert('Please enter a valid name');
+        return;
+    }
 
-                try {
-                    const success = await clientDB.updateUser(getCurrentUser().id, {
-                        full_name: newName,
-                        updated_at: new Date().toISOString()
-                    });
-                    
-                    if (success) {
-                        // Update local storage
-                        localStorage.setItem('user_name', newName);
-                        // Update current user object
-                        getCurrentUser().full_name = newName;
-                        // Update UI
-                        document.getElementById('profileName').textContent = newName;
-                        
-                        showSuccessMessage('✅ Name updated successfully!');
-                        closeEditNameModal();
-                    } else {
-                        alert('❌ Failed to update name. Please try again.');
-                    }
-                } catch (error) {
-                    console.error('Error updating name:', error);
-                    alert('❌ Error updating name. Please try again.');
-                }
-            });
-
+    try {
+        const currentUser = getCurrentUser();
+        console.log('Updating user:', currentUser.id);
+        
+        // Use the CORRECT function - clientDB.updateUser
+        const success = await clientDB.updateUser(currentUser.id, {
+            full_name: newName,
+            updated_at: new Date().toISOString()
+        });
+        
+        console.log('Update result:', success);
+        
+        if (success) {
+            // Update local storage
+            localStorage.setItem('user_name', newName);
+            // Update current user object
+            currentUser.full_name = newName;
+            // Update UI
+            document.getElementById('profileName').textContent = newName;
+            
+            showSuccessMessage('✅ Name updated successfully!');
+            closeEditNameModal();
+        } else {
+            alert('❌ Failed to update name. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error updating name:', error);
+        alert('❌ Error updating name: ' + error.message);
+    }
+});
             // Change Password Form Handler - CORRECTED VERSION
             document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
