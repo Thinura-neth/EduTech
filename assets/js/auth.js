@@ -1,4 +1,4 @@
-// assets/js/auth.js - Complete Authentication System with Coins Support
+// assets/js/auth.js - Complete Authentication System (Firebase Only) - නිවැරදි කළ
 let currentUser = null;
 
 // Check if user is logged in
@@ -12,8 +12,7 @@ function isLoggedIn() {
             email: userEmail,
             full_name: localStorage.getItem('user_name') || userEmail.split('@')[0],
             role: localStorage.getItem('user_role') || 'user',
-            created_at: localStorage.getItem('user_created_at') || new Date().toISOString(),
-            coins: parseInt(localStorage.getItem('user_coins') || '0')
+            created_at: localStorage.getItem('user_created_at') || new Date().toISOString()
         };
         return true;
     }
@@ -51,7 +50,7 @@ function requireAdmin() {
 }
 
 // Login function - Firebase Only
-async function loginUser(email, password) {
+async function login(email, password) {
     console.log('🔐 Firebase login attempt:', email);
     
     // Show loading state
@@ -68,21 +67,14 @@ async function loginUser(email, password) {
         if (user) {
             console.log('✅ Login successful:', email);
             
-            // Initialize coins for user if not exists
-            await clientDB.initializeUserCoins(user.id);
-            
-            // Get updated user data with coins
-            const userWithCoins = await clientDB.getUser(user.id);
-            
             // Store user data in localStorage
-            localStorage.setItem('user_id', userWithCoins.id);
-            localStorage.setItem('user_email', userWithCoins.email);
-            localStorage.setItem('user_name', userWithCoins.full_name || userWithCoins.email.split('@')[0]);
-            localStorage.setItem('user_role', userWithCoins.role || 'user');
-            localStorage.setItem('user_created_at', userWithCoins.created_at || new Date().toISOString());
-            localStorage.setItem('user_coins', userWithCoins.coins || '0');
+            localStorage.setItem('user_id', user.id);
+            localStorage.setItem('user_email', user.email);
+            localStorage.setItem('user_name', user.full_name || user.email.split('@')[0]);
+            localStorage.setItem('user_role', user.role || 'user');
+            localStorage.setItem('user_created_at', user.created_at || new Date().toISOString());
             
-            currentUser = userWithCoins;
+            currentUser = user;
             
             // Update login info in database
             await clientDB.updateUser(user.id, {
@@ -96,7 +88,7 @@ async function loginUser(email, password) {
             return {
                 success: true,
                 message: 'Login successful! Redirecting...',
-                user: userWithCoins
+                user: user
             };
         } else {
             console.log('❌ Login failed - invalid credentials');
@@ -122,7 +114,7 @@ async function loginUser(email, password) {
 }
 
 // Register function - Firebase Only
-async function registerUser(email, password, fullName = '') {
+async function register(email, password, fullName = '') {
     console.log('📝 Firebase registration attempt:', email);
     
     // Show loading state
@@ -139,26 +131,19 @@ async function registerUser(email, password, fullName = '') {
         if (user) {
             console.log('✅ Registration successful:', email);
             
-            // Initialize coins for new user
-            await clientDB.initializeUserCoins(user.id);
-            
-            // Get user data with coins
-            const userWithCoins = await clientDB.getUser(user.id);
-            
             // Store user data in localStorage and auto-login
-            localStorage.setItem('user_id', userWithCoins.id);
-            localStorage.setItem('user_email', userWithCoins.email);
-            localStorage.setItem('user_name', userWithCoins.full_name);
-            localStorage.setItem('user_role', userWithCoins.role);
-            localStorage.setItem('user_created_at', userWithCoins.created_at);
-            localStorage.setItem('user_coins', userWithCoins.coins || '0');
+            localStorage.setItem('user_id', user.id);
+            localStorage.setItem('user_email', user.email);
+            localStorage.setItem('user_name', user.full_name);
+            localStorage.setItem('user_role', user.role);
+            localStorage.setItem('user_created_at', user.created_at);
             
-            currentUser = userWithCoins;
+            currentUser = user;
 
             return {
                 success: true,
                 message: 'Registration successful! You are now logged in.',
-                user: userWithCoins
+                user: user
             };
         } else {
             console.log('❌ Registration failed - user might already exist');
@@ -199,7 +184,6 @@ function logout() {
     localStorage.removeItem('user_name');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_created_at');
-    localStorage.removeItem('user_coins');
     
     currentUser = null;
     
@@ -261,90 +245,6 @@ function updateNavigation() {
     }
 }
 
-// Update user coins in localStorage
-function updateUserCoinsLocal(coins) {
-    const user = getCurrentUser();
-    if (user) {
-        user.coins = coins;
-        localStorage.setItem('user_coins', coins.toString());
-    }
-}
-
-// Get user coins with fallback
-async function getUserCoins(userId) {
-    try {
-        // Try Firebase first
-        const coins = await clientDB.getUserCoins(userId);
-        updateUserCoinsLocal(coins);
-        return coins;
-    } catch (error) {
-        console.error('Error getting coins from Firebase, using localStorage:', error);
-        // Fallback to localStorage
-        return parseInt(localStorage.getItem('user_coins') || '0');
-    }
-}
-
-// Add coins with fallback
-async function addUserCoins(userId, amount, reason = 'Bonus') {
-    try {
-        // Try Firebase first
-        const success = await clientDB.addCoins(userId, amount, reason);
-        if (success) {
-            const newCoins = await getUserCoins(userId);
-            updateUserCoinsLocal(newCoins);
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.error('Error adding coins via Firebase, using localStorage:', error);
-        // Fallback to localStorage
-        return addCoinsLocalStorage(userId, amount, reason);
-    }
-}
-
-// Local Storage fallback for coins
-function addCoinsLocalStorage(userId, amount, reason = 'Bonus') {
-    try {
-        const key = `edutech_coins_${userId}`;
-        const historyKey = `edutech_coins_history_${userId}`;
-        
-        // Get current coins
-        const currentCoins = parseInt(localStorage.getItem(key) || localStorage.getItem('user_coins') || '0');
-        const newCoins = currentCoins + amount;
-        
-        // Update coins
-        localStorage.setItem(key, newCoins.toString());
-        localStorage.setItem('user_coins', newCoins.toString());
-        
-        // Update current user
-        if (currentUser) {
-            currentUser.coins = newCoins;
-        }
-        
-        // Add to history
-        const history = JSON.parse(localStorage.getItem(historyKey) || '[]');
-        history.unshift({
-            amount: amount,
-            reason: reason,
-            timestamp: Date.now(),
-            new_balance: newCoins
-        });
-        
-        // Keep only last 50 entries
-        if (history.length > 50) {
-            history.splice(50);
-        }
-        
-        localStorage.setItem(historyKey, JSON.stringify(history));
-        
-        console.log(`✅ Added ${amount} coins via localStorage. New balance: ${newCoins}`);
-        return true;
-    } catch (error) {
-        console.error('Error with localStorage coins:', error);
-        return false;
-    }
-}
-
 // Initialize auth system when page loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔐 Auth system initializing...');
@@ -353,14 +253,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         updateNavigation();
         
-        // Update coins balance if user is logged in
+        // Debug info
         if (isLoggedIn()) {
-            const user = getCurrentUser();
-            getUserCoins(user.id).then(coins => {
-                console.log('💰 User coins balance:', coins);
-            });
-            
-            console.log('✅ User is logged in:', user);
+            console.log('✅ User is logged in:', getCurrentUser());
         } else {
             console.log('❌ No user logged in');
             console.log('💡 Demo credentials: admin@example.com / password123');
@@ -368,37 +263,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 
+
 // Debug function to check auth status
 function debugAuth() {
     console.log('=== AUTH DEBUG ===');
     console.log('Current User:', getCurrentUser());
     console.log('Is Logged In:', isLoggedIn());
     console.log('Is Admin:', isAdmin());
-    console.log('User Coins:', getCurrentUser()?.coins || 0);
-    console.log('Firebase Initialized:', typeof clientDB !== 'undefined' && clientDB.initialized);
+    console.log('Firebase Initialized:', clientDB.initialized);
     console.log('LocalStorage:', {
         user_id: localStorage.getItem('user_id'),
         user_email: localStorage.getItem('user_email'),
         user_name: localStorage.getItem('user_name'),
         user_role: localStorage.getItem('user_role'),
-        user_created_at: localStorage.getItem('user_created_at'),
-        user_coins: localStorage.getItem('user_coins')
+        user_created_at: localStorage.getItem('user_created_at')
     });
 }
-
-
-// Export functions for global use
-window.loginUser = loginUser;
-window.registerUser = registerUser;
-window.logout = logout;
-window.isLoggedIn = isLoggedIn;
-window.getCurrentUser = getCurrentUser;
-window.isAdmin = isAdmin;
-window.requireAdmin = requireAdmin;
-window.updateNavigation = updateNavigation;
-window.debugAuth = debugAuth;
-window.addUserCoins = addUserCoins;
-window.getUserCoins = getUserCoins;
 
 // Call auto-login on login page
 if (window.location.href.includes('login.html')) {
