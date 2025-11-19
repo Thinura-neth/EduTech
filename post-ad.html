@@ -19,9 +19,9 @@
             --dark: #0f172a;
             --light: #f1f5f9;
             --gray: #94a3b8;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --border: rgba(0, 0, 0, 0.1);
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             --transition: all 0.3s ease;
         }
 
@@ -33,8 +33,8 @@
         }
 
         body {
-            background: #f8fafc;
-            color: #334155;
+            background: linear-gradient(135deg, #0f1724 0%, #1e293b 100%);
+            color: #f1f5f9;
             line-height: 1.6;
             min-height: 100vh;
         }
@@ -51,9 +51,10 @@
         }
 
         .header {
-            background: white;
-            border-bottom: 1px solid var(--border);
-            box-shadow: var(--shadow);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -63,34 +64,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
             max-width: 1200px;
             margin: 0 auto;
         }
 
         .logo {
-            font-size: 1.4rem;
-            font-weight: 700;
+            font-size: 1.8rem;
+            font-weight: bold;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .nav-links {
             display: flex;
             list-style: none;
-            gap: 1.2rem;
+            gap: 2rem;
             align-items: center;
         }
 
         .nav-links a {
+            color: #cbd5e1;
             text-decoration: none;
-            color: #475569;
             font-weight: 500;
-            transition: var(--transition);
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
         }
 
         .nav-links a:hover {
@@ -100,32 +100,31 @@
 
         .user-welcome {
             color: var(--primary);
-            font-weight: 500;
-            font-size: 0.9rem;
+            font-weight: 600;
+            margin-right: 1rem;
         }
 
         .logout-btn {
-            background: var(--primary);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
         }
 
         .logout-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         .container {
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
-            padding: 1.5rem 2rem;
+            padding: 2rem;
         }
 
         .page-header {
@@ -135,20 +134,21 @@
         }
 
         .page-header h1 {
-            font-size: 2rem;
+            font-size: 2.5rem;
             margin-bottom: 0.5rem;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .page-header p {
             color: var(--gray);
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
         .ad-form-container {
-            background: white;
+            background: var(--card-bg);
             padding: 2rem;
             border-radius: 12px;
             border: 1px solid var(--border);
@@ -161,23 +161,23 @@
         }
 
         .form-section h3 {
-            color: #1e293b;
+            color: #f1f5f9;
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
             border-bottom: 2px solid var(--primary);
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
 
         .form-group {
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
             display: block;
             font-weight: 600;
-            color: #374151;
+            color: #cbd5e1;
             margin-bottom: 0.5rem;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .form-group input,
@@ -185,11 +185,11 @@
         .form-group textarea {
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid #d1d5db;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
             border-radius: 6px;
-            background: white;
-            color: #374151;
-            font-size: 0.9rem;
+            color: #f1f5f9;
+            font-size: 0.95rem;
             transition: var(--transition);
         }
 
@@ -198,7 +198,12 @@
         .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #64748b;
         }
 
         .form-group textarea {
@@ -228,7 +233,7 @@
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
-            color: #6b7280;
+            color: #94a3b8;
             font-weight: 500;
         }
 
@@ -237,23 +242,34 @@
         }
 
         .image-upload {
-            border: 2px dashed #d1d5db;
+            border: 2px dashed var(--border);
             border-radius: 8px;
             padding: 2rem;
             text-align: center;
             transition: var(--transition);
             cursor: pointer;
+            background: rgba(15, 23, 42, 0.5);
         }
 
         .image-upload:hover {
             border-color: var(--primary);
-            background: rgba(6, 182, 212, 0.05);
+            background: rgba(6, 182, 212, 0.1);
         }
 
         .image-upload i {
             font-size: 2rem;
             color: var(--primary);
             margin-bottom: 0.5rem;
+        }
+
+        .image-upload h4 {
+            color: #f1f5f9;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-upload p {
+            color: var(--gray);
+            font-size: 0.9rem;
         }
 
         .image-upload input {
@@ -295,6 +311,12 @@
             align-items: center;
             justify-content: center;
             font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .remove-image:hover {
+            background: rgba(239, 68, 68, 1);
+            transform: scale(1.1);
         }
 
         .package-options {
@@ -305,27 +327,29 @@
         }
 
         .package-option {
-            border: 2px solid #e5e7eb;
+            border: 2px solid var(--border);
             border-radius: 8px;
             padding: 1.5rem;
             text-align: center;
             cursor: pointer;
             transition: var(--transition);
+            background: rgba(15, 23, 42, 0.5);
         }
 
         .package-option:hover {
             border-color: var(--primary);
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .package-option.selected {
             border-color: var(--primary);
-            background: rgba(6, 182, 212, 0.05);
+            background: rgba(6, 182, 212, 0.1);
         }
 
         .package-name {
             font-weight: 600;
-            color: #1e293b;
+            color: #f1f5f9;
             margin-bottom: 0.5rem;
         }
 
@@ -338,7 +362,7 @@
 
         .package-features {
             list-style: none;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--gray);
         }
 
@@ -368,40 +392,47 @@
             border: none;
             cursor: pointer;
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
         }
 
-        .btn-secondary {
-            background: linear-gradient(135deg, #64748b, #475569);
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
         }
 
-        .btn-success {
-            background: linear-gradient(135deg, var(--success), #059669);
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #f1f5f9;
         }
 
         .footer {
-            background: white;
+            background: #0f172a;
             color: #64748b;
             text-align: center;
-            padding: 1.2rem;
+            padding: 1.5rem;
             margin-top: 2rem;
             border-top: 1px solid var(--border);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .auth-message {
             text-align: center;
             padding: 3rem;
-            background: white;
+            background: var(--card-bg);
             border-radius: 12px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
@@ -410,16 +441,23 @@
         .auth-message h2 {
             color: var(--primary);
             margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .auth-message p {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
         }
 
         .success-message {
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #065f46;
+            color: #10b981;
             padding: 1rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
             text-align: center;
+            font-weight: 500;
         }
 
         @media (max-width: 768px) {
@@ -430,11 +468,11 @@
             .nav {
                 padding: 1rem;
                 flex-direction: column;
-                gap: 0.8rem;
+                gap: 1rem;
             }
             
             .nav-links {
-                gap: 0.8rem;
+                gap: 1rem;
             }
             
             .ad-form-container {
@@ -444,6 +482,26 @@
             .form-actions {
                 flex-direction: column;
             }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease;
         }
     </style>
 </head>
@@ -465,17 +523,17 @@
     </header>
 
     <main class="container">
-        <div class="page-header">
+        <div class="page-header fade-in">
             <h1>📦 Sell Your Item</h1>
             <p>Reach thousands of students and educators on EduTech platform</p>
         </div>
 
         <div id="authMessage" style="display: none;">
-            <div class="auth-message">
+            <div class="auth-message fade-in">
                 <h2>🔐 Login Required</h2>
                 <p>You need to be logged in to post an advertisement.</p>
                 <a href="login.html" class="btn btn-primary">Login Now</a>
-                <p style="margin-top: 1rem; color: var(--gray);">Don't have an account? <a href="login.html" style="color: var(--primary);">Register here</a></p>
+                <p style="margin-top: 1.5rem; color: var(--gray);">Don't have an account? <a href="login.html" style="color: var(--primary); text-decoration: underline;">Register here</a></p>
             </div>
         </div>
 
@@ -484,7 +542,7 @@
                 <i class="fas fa-check-circle"></i> Your ad has been submitted successfully! It will be visible after approval.
             </div>
 
-            <div class="ad-form-container">
+            <div class="ad-form-container fade-in">
                 <form id="adSubmissionForm">
                     <div class="form-section">
                         <h3>📝 Item Details</h3>
@@ -720,7 +778,10 @@
                     uploadedImages = [];
                     
                     // Scroll to top to show success message
-                    window.scrollTo(0, 0);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    // Reset package selection
+                    selectPackage('basic');
                 } else {
                     alert('Error submitting ad. Please try again.');
                 }
@@ -757,6 +818,15 @@
             
             // Add form submit handler
             document.getElementById('adSubmissionForm').addEventListener('submit', submitAd);
+            
+            // Animate loading bar
+            const loadingBar = document.querySelector('.loading-bar');
+            setTimeout(() => {
+                loadingBar.style.width = '100%';
+                setTimeout(() => {
+                    loadingBar.style.opacity = '0';
+                }, 500);
+            }, 100);
         });
     </script>
 </body>
