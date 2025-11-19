@@ -588,3 +588,73 @@ clientDB.recordAdClick = async function(campaignId) {
         console.error('Error recording ad click:', error);
     }
 };
+// User Ads Management Functions
+clientDB.saveUserAd = async function(adData) {
+    try {
+        const adId = 'ad_' + Date.now();
+        const adRef = ref(this.db, `user_ads/${adId}`);
+        
+        await set(adRef, {
+            id: adId,
+            ...adData,
+            status: 'pending', // pending, approved, rejected
+            views: 0,
+            createdAt: new Date().toISOString()
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('Error saving user ad:', error);
+        
+        // Fallback to localStorage
+        return this.saveUserAdToLocalStorage(adData);
+    }
+};
+
+clientDB.getUserAds = async function() {
+    try {
+        const adsRef = ref(this.db, 'user_ads');
+        const snapshot = await get(adsRef);
+        const adsData = snapshot.val();
+        
+        if (!adsData) return [];
+        
+        return Object.values(adsData).filter(ad => ad.status === 'approved');
+    } catch (error) {
+        console.error('Error getting user ads:', error);
+        
+        // Fallback to localStorage
+        return this.getUserAdsFromLocalStorage();
+    }
+};
+
+clientDB.saveUserAdToLocalStorage = function(adData) {
+    try {
+        const ads = JSON.parse(localStorage.getItem('edutech_user_ads') || '[]');
+        const adId = 'ad_' + Date.now();
+        
+        ads.push({
+            id: adId,
+            ...adData,
+            status: 'approved', // Auto-approve for demo
+            views: 0,
+            createdAt: new Date().toISOString()
+        });
+        
+        localStorage.setItem('edutech_user_ads', JSON.stringify(ads));
+        return true;
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+        return false;
+    }
+};
+
+clientDB.getUserAdsFromLocalStorage = function() {
+    try {
+        const ads = JSON.parse(localStorage.getItem('edutech_user_ads') || '[]');
+        return ads.filter(ad => ad.status === 'approved');
+    } catch (error) {
+        console.error('Error reading from localStorage:', error);
+        return [];
+    }
+};
