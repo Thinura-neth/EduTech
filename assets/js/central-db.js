@@ -514,3 +514,77 @@ if (document.readyState === 'loading') {
         clientDB.initializeDefaultAdmin();
     }, 2000);
 }
+
+// Add these functions to your central-db.js file
+
+// Ads Management Functions
+clientDB.getAdCampaigns = async function() {
+    try {
+        const campaignsRef = ref(this.db, 'ad_campaigns');
+        const snapshot = await get(campaignsRef);
+        const campaignsData = snapshot.val();
+        
+        if (!campaignsData) return [];
+        
+        return Object.values(campaignsData);
+    } catch (error) {
+        console.error('Error getting ad campaigns:', error);
+        throw error;
+    }
+};
+
+clientDB.saveAdCampaign = async function(campaign) {
+    try {
+        const campaignRef = ref(this.db, `ad_campaigns/${campaign.id}`);
+        await set(campaignRef, campaign);
+        return true;
+    } catch (error) {
+        console.error('Error saving ad campaign:', error);
+        throw error;
+    }
+};
+
+clientDB.updateAdCampaign = async function(campaignId, updates) {
+    try {
+        const campaignRef = ref(this.db, `ad_campaigns/${campaignId}`);
+        await update(campaignRef, updates);
+        return true;
+    } catch (error) {
+        console.error('Error updating ad campaign:', error);
+        throw error;
+    }
+};
+
+clientDB.recordAdImpression = async function(campaignId) {
+    try {
+        const campaignRef = ref(this.db, `ad_campaigns/${campaignId}`);
+        const snapshot = await get(campaignRef);
+        const campaign = snapshot.val();
+        
+        if (campaign) {
+            await update(campaignRef, {
+                impressions: (campaign.impressions || 0) + 1,
+                lastImpression: new Date().toISOString()
+            });
+        }
+    } catch (error) {
+        console.error('Error recording ad impression:', error);
+    }
+};
+
+clientDB.recordAdClick = async function(campaignId) {
+    try {
+        const campaignRef = ref(this.db, `ad_campaigns/${campaignId}`);
+        const snapshot = await get(campaignRef);
+        const campaign = snapshot.val();
+        
+        if (campaign) {
+            await update(campaignRef, {
+                clicks: (campaign.clicks || 0) + 1,
+                lastClick: new Date().toISOString()
+            });
+        }
+    } catch (error) {
+        console.error('Error recording ad click:', error);
+    }
+};
