@@ -328,57 +328,72 @@
         }
 
         // Update user name
-        async function updateUserName(newName) {
-            const currentUser = getCurrentUser();
-            if (!currentUser) return false;
+// Update user name - CORRECTED VERSION
+async function updateUserName(newName) {
+    const currentUser = getCurrentUser();
+    if (!currentUser) return false;
 
-            try {
-               const success = await clientDB.updateUser(currentUser.id, {
-                     full_name: newName,
-                     updated_at: new Date().toISOString()
-               });
-                if (success) {
-                    // Update local storage and current user data
-                    localStorage.setItem('user_name', newName);
-                    currentUser.full_name = newName;
-                    
-                    // Update UI
-                    document.getElementById('profileName').textContent = newName;
-                    showSuccessMessage('✅ Name updated successfully!');
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                console.error('Error updating user name:', error);
-                return false;
-            }
+    try {
+        console.log('Updating user name for user:', currentUser.id, 'New name:', newName);
+        
+        // Use the correct function from central-db.js
+        const success = await clientDB.updateUser(currentUser.id, {
+            full_name: newName,
+            updated_at: new Date().toISOString()
+        });
+        
+        if (success) {
+            // Update local storage and current user data
+            localStorage.setItem('user_name', newName);
+            currentUser.full_name = newName;
+            
+            // Update UI
+            document.getElementById('profileName').textContent = newName;
+            showSuccessMessage('✅ Name updated successfully!');
+            return true;
+        } else {
+            showSuccessMessage('❌ Failed to update name');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error updating user name:', error);
+        showSuccessMessage('❌ Error updating name');
+        return false;
+    }
+}
+
+// Change user password - CORRECTED VERSION  
+async function changeUserPassword(currentPassword, newPassword) {
+    const currentUser = getCurrentUser();
+    if (!currentUser) return false;
+
+    try {
+        // First verify current password
+        const isValid = await clientDB.verifyUser(currentUser.email, currentPassword);
+        if (!isValid) {
+            alert('❌ Current password is incorrect!');
+            return false;
         }
 
-        // Change user password
-        async function changeUserPassword(currentPassword, newPassword) {
-            const currentUser = getCurrentUser();
-            if (!currentUser) return false;
-
-            try {
-                // First verify current password
-                const isValid = await clientDB.verifyUserPassword(currentUser.email, currentPassword);
-                if (!isValid) {
-                    alert('❌ Current password is incorrect!');
-                    return false;
-                }
-
-                // Update password
-                const success = await clientDB.updateUserPassword(currentUser.id, newPassword);
-                if (success) {
-                    showSuccessMessage('✅ Password changed successfully!');
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                console.error('Error changing password:', error);
-                return false;
-            }
+        // Update password using updateUser function
+        const success = await clientDB.updateUser(currentUser.id, {
+            password: newPassword,
+            updated_at: new Date().toISOString()
+        });
+        
+        if (success) {
+            showSuccessMessage('✅ Password changed successfully!');
+            return true;
+        } else {
+            showSuccessMessage('❌ Failed to change password');
+            return false;
         }
+    } catch (error) {
+        console.error('Error changing password:', error);
+        showSuccessMessage('❌ Error changing password');
+        return false;
+    }
+}
 
         // Go back to dashboard
         function goToDashboard() {
