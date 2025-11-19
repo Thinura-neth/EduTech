@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - EduTech</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Add similar styles as post-ad.html but for marketplace layout */
+        /* I'll provide the complete CSS in the response */
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">EduTech Marketplace</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="marketplace.html" class="active">Marketplace</a></li>
+                <li><a href="post-ad.html" class="btn-post-ad">+ Post Ad</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
+                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <h1>🛍️ EduTech Marketplace</h1>
+            <p>Buy and sell educational items, books, electronics and more</p>
+        </div>
+
+        <div class="marketplace-actions">
+            <a href="post-ad.html" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Post Free Ad
+            </a>
+        </div>
+
+        <div class="ads-grid" id="adsGrid">
+            <!-- Ads will be loaded here -->
+            <div class="loading">Loading marketplace ads...</div>
+        </div>
+    </main>
+</body>
+</html>
