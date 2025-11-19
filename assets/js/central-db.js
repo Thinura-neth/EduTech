@@ -634,3 +634,94 @@ async function getUserById(userId) {
         return null;
     }
 }
+// Coins Management Functions
+clientDB.addCoins = async function(userId, amount, reason = 'Bonus') {
+    try {
+        console.log(`Adding ${amount} coins to user ${userId} for: ${reason}`);
+        
+        // Get current user coins
+        const userRef = ref(this.db, 'users/' + userId);
+        const snapshot = await get(userRef);
+        const userData = snapshot.val();
+        
+        if (!userData) {
+            console.error('User not found:', userId);
+            return false;
+        }
+        
+        // Calculate new coin balance
+        const currentCoins = userData.coins || 0;
+        const newCoins = currentCoins + amount;
+        
+        // Update user coins
+        await update(userRef, {
+            coins: newCoins
+        });
+        
+        // Add to coins history
+        const historyRef = ref(this.db, `coins_history/${userId}`);
+        const newHistoryRef = push(historyRef);
+        await set(newHistoryRef, {
+            amount: amount,
+            reason: reason,
+            timestamp: Date.now(),
+            new_balance: newCoins
+        });
+        
+        console.log(`✅ Successfully added ${amount} coins. New balance: ${newCoins}`);
+        return true;
+    } catch (error) {
+        console.error('❌ Error adding coins:', error);
+        return false;
+    }
+};
+
+// Get user coins balance
+clientDB.getUserCoins = async function(userId) {
+    try {
+        const userRef = ref(this.db, 'users/' + userId);
+        const snapshot = await get(userRef);
+        const userData = snapshot.val();
+        
+        return userData?.coins || 0;
+    } catch (error) {
+        console.error('Error getting user coins:', error);
+        return 0;
+    }
+};
+
+// Get user coins history
+clientDB.getUserCoinsHistory = async function(userId) {
+    try {
+        const historyRef = ref(this.db, `coins_history/${userId}`);
+        const snapshot = await get(historyRef);
+        const historyData = snapshot.val();
+        
+        if (!historyData) return [];
+        
+        // Convert to array and sort by timestamp
+        return Object.values(historyData)
+            .sort((a, b) => b.timestamp - a.timestamp);
+    } catch (error) {
+        console.error('Error getting coins history:', error);
+        return [];
+    }
+};
+
+// Initialize coins for existing users
+clientDB.initializeUserCoins = async function(userId) {
+    try {
+        const userRef = ref(this.db, 'users/' + userId);
+        const snapshot = await get(userRef);
+        const userData = snapshot.val();
+        
+        if (userData && typeof userData.coins === 'undefined') {
+            await update(userRef, {
+                coins: 0
+            });
+            console.log(`✅ Initialized coins for user ${userId}`);
+        }
+    } catch (error) {
+        console.error('Error initializing user coins:', error);
+    }
+};
