@@ -5,12 +5,537 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="firebase-config.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .loading-bar {
+            height: 4px;
+            width: 0;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .user-welcome {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .contact-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .contact-card.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .contact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .contact-card h3 {
+            margin-bottom: 0.75rem;
+            color: var(--dark);
+        }
+
+        .contact-card p {
+            color: var(--gray);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .contact-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .contact-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .contact-form-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .contact-form-container h2 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-label input {
+            width: auto;
+            margin-right: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .checkbox-label a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .checkbox-label a:hover {
+            text-decoration: underline;
+        }
+
+        .faq-section {
+            margin-bottom: 3rem;
+        }
+
+        .faq-section h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--dark);
+        }
+
+        .faq-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .faq-item {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .faq-item.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .faq-question {
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .faq-question:hover {
+            background: rgba(67, 97, 238, 0.05);
+        }
+
+        .faq-question h4 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .faq-toggle {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .faq-answer {
+            padding: 0 1.25rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 1.25rem 1.25rem;
+            max-height: 200px;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        .footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        /* WhatsApp Floating Button */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 60px;
+            height: 60px;
+            background: #25D366;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            z-index: 100;
+            transition: var(--transition);
+            animation: pulse 2s infinite;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .contact-info {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .contact-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-grid {
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .page-header p {
+                font-size: 1rem;
+            }
+            
+            .contact-form-container,
+            .card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Success Message */
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            text-align: center;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-    <div class="loading-bar"></div>
+    <div class="loading-bar" id="loadingBar"></div>
+    
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/94774571418?text=Hello%20EduTech%2C%20I%20would%20like%20to%20get%20more%20information" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
     
     <header class="header">
         <nav class="nav">
@@ -28,34 +553,46 @@
     <main class="container">
         <div class="page-header">
             <h1>Contact Us</h1>
-            <p>Get in touch with our team - we're here to help you succeed</p>
+            <p>Get in touch with our team - we're here to help you succeed in your learning journey</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i> Thank you! Your message has been sent successfully.
         </div>
 
         <div class="contact-grid">
             <div class="contact-info">
                 <div class="contact-card">
-                    <div class="contact-icon">📧</div>
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
                     <h3>Email Us</h3>
                     <p>Send us a message and we'll respond within 24 hours</p>
                     <a href="mailto:support@edutech.com" class="contact-link">support@edutech.com</a>
                 </div>
 
                 <div class="contact-card">
-                    <div class="contact-icon">📞</div>
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
                     <h3>Call Us</h3>
                     <p>Speak directly with our support team during business hours</p>
                     <a href="tel:+94112345678" class="contact-link">+94 11 234 5678</a>
                 </div>
 
                 <div class="contact-card">
-                    <div class="contact-icon">💬</div>
+                    <div class="contact-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
                     <h3>Live Chat</h3>
                     <p>Get instant help from our online support team</p>
                     <button class="btn btn-primary" onclick="openChat()">Start Chat</button>
                 </div>
 
                 <div class="contact-card">
-                    <div class="contact-icon">🏢</div>
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
                     <h3>Visit Us</h3>
                     <p>Come see us at our main campus</p>
                     <address>
@@ -81,6 +618,11 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                        </div>
+
+                        <div class="form-group">
                             <label for="subject">Subject</label>
                             <select id="subject" name="subject" required>
                                 <option value="">Select a subject</option>
@@ -102,11 +644,13 @@
                             <label class="checkbox-label">
                                 <input type="checkbox" required>
                                 <span class="checkmark"></span>
-                                I agree to the <a href="#">privacy policy</a> and terms of service
+                                I agree to the <a href="privacy.html">privacy policy</a> and terms of service
                             </label>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-full">Send Message</button>
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
                     </form>
                 </div>
             </div>
@@ -122,7 +666,7 @@
                             <span class="faq-toggle">+</span>
                         </div>
                         <div class="faq-answer">
-                            <p>Click on "Forgot Password" on the login page and follow the instructions sent to your email.</p>
+                            <p>Click on "Forgot Password" on the login page and follow the instructions sent to your email. You'll receive a secure link to reset your password within minutes.</p>
                         </div>
                     </div>
 
@@ -132,7 +676,7 @@
                             <span class="faq-toggle">+</span>
                         </div>
                         <div class="faq-answer">
-                            <p>Yes, most course materials are available for download. Look for the download icon in each lesson.</p>
+                            <p>Yes, most course materials are available for download. Look for the download icon in each lesson. Some materials might be restricted to online viewing only to protect intellectual property.</p>
                         </div>
                     </div>
 
@@ -142,7 +686,7 @@
                             <span class="faq-toggle">+</span>
                         </div>
                         <div class="faq-answer">
-                            <p>Yes, we provide certificates of completion for all courses upon successful finishing.</p>
+                            <p>Yes, we provide certificates of completion for all courses upon successful finishing. Certificates are digitally signed and can be shared on LinkedIn and other professional networks.</p>
                         </div>
                     </div>
 
@@ -152,7 +696,7 @@
                             <span class="faq-toggle">+</span>
                         </div>
                         <div class="faq-answer">
-                            <p>We accept credit cards, debit cards, PayPal, and bank transfers for course payments.</p>
+                            <p>We accept credit cards, debit cards, PayPal, and bank transfers for course payments. We also offer installment plans for higher-priced courses.</p>
                         </div>
                     </div>
                 </div>
@@ -160,7 +704,9 @@
         </div>
 
         <div style="text-align: center; margin-top: 2rem;">
-            <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+            <a href="dashboard.html" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
         </div>
     </main>
 
@@ -170,8 +716,17 @@
 
     <script src="assets/js/auth.js"></script>
     <script>
+        // Loading bar animation
+        window.addEventListener('load', function() {
+            const loadingBar = document.getElementById('loadingBar');
+            loadingBar.style.width = '100%';
+            setTimeout(() => {
+                loadingBar.style.opacity = '0';
+            }, 500);
+        });
+
         function openChat() {
-            alert('Live chat feature coming soon! In the meantime, please use our contact form.');
+            alert('Live chat feature coming soon! In the meantime, please use our contact form or WhatsApp.');
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -187,16 +742,22 @@
                 
                 // Simulate form submission
                 const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
+                const originalText = submitBtn.innerHTML;
+                const successMessage = document.getElementById('successMessage');
                 
-                submitBtn.textContent = 'Sending...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
                 submitBtn.disabled = true;
                 
                 setTimeout(() => {
-                    alert(`Thank you, ${name}! Your message has been sent successfully. We'll respond to ${email} within 24 hours.`);
+                    successMessage.classList.add('show');
                     this.reset();
-                    submitBtn.textContent = originalText;
+                    submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
+                    
+                    // Hide success message after 5 seconds
+                    setTimeout(() => {
+                        successMessage.classList.remove('show');
+                    }, 5000);
                 }, 2000);
             });
 
@@ -209,7 +770,7 @@
                     
                     // Close other open FAQs
                     document.querySelectorAll('.faq-item').forEach(item => {
-                        if (item !== faqItem) {
+                        if (item !== faqItem && item.classList.contains('active')) {
                             item.classList.remove('active');
                             item.querySelector('.faq-toggle').textContent = '+';
                         }
@@ -217,11 +778,11 @@
                     
                     // Toggle current FAQ
                     faqItem.classList.toggle('active');
-                    toggle.textContent = faqItem.classList.contains('active') ? '−' : '+';
+                    toggle.textContent = faqItem.classList.contains('active') ? '×' : '+';
                 });
             });
 
-            // Add animations to contact cards
+            // Add animations to contact cards and FAQ items
             const observerOptions = {
                 threshold: 0.1,
                 rootMargin: '0px 0px -50px 0px'
@@ -237,6 +798,11 @@
 
             document.querySelectorAll('.contact-card, .faq-item').forEach(element => {
                 observer.observe(element);
+            });
+
+            // Stagger animation for contact cards
+            document.querySelectorAll('.contact-card').forEach((card, index) => {
+                card.style.transitionDelay = `${index * 0.1}s`;
             });
         });
     </script>
