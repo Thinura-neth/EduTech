@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="firebase-config.js"></script>
 </head>
 <body>
     <div class="loading-bar"></div>
@@ -60,10 +59,6 @@
                                 <div class="stat-number" id="completedCount">0</div>
                                 <div class="stat-label">Completed</div>
                             </div>
-                            <div class="stat-item coins-stat">
-                                <div class="stat-number" id="coinsCount">0</div>
-                                <div class="stat-label">🪙 Coins Earned</div>
-                            </div>
                         </div>
                     </div>
 
@@ -84,7 +79,6 @@
                             <a href="gallery.html" class="quick-link">🖼️ Gallery</a>
                             <a href="blog.html" class="quick-link">📝 Blog</a>
                             <a href="contact.html" class="quick-link">📞 Contact</a>
-                            <a href="earn-coins.html" class="quick-link coins-link">🪙 Earn Coins</a>
                             <a href="admin.html" class="quick-link admin-link" style="display: none;">🔧 Admin Panel</a>
                         </div>
                     </div>
@@ -103,15 +97,7 @@
                         <div class="action-buttons">
                             <button class="btn btn-primary" onclick="viewProfile()">View Profile</button>
                             <button class="btn btn-secondary" onclick="browseCourses()">Browse Courses</button>
-                            <button class="btn btn-warning" onclick="earnCoins()">🪙 Earn Coins</button>
                             <button class="btn btn-secondary" onclick="contactSupport()">Contact Support</button>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>🏆 Recent Coins</h3>
-                        <div id="recentCoins">
-                            <div class="loading-courses">Loading coin history...</div>
                         </div>
                     </div>
                 </div>
@@ -126,11 +112,6 @@
     <script src="assets/js/database.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
-        // Earn Coins function
-        function earnCoins() {
-            window.location.href = 'earn-coins.html';
-        }
-
         // Update dashboard stats
         async function updateDashboardStats() {
             const currentUser = getCurrentUser();
@@ -144,22 +125,17 @@
                     ? Math.round(userCourses.reduce((sum, course) => sum + course.progress_percentage, 0) / userCourses.length)
                     : 0;
 
-                // User ගේ coins ගණන ගන්න
-                const userCoins = await clientDB.getUserCoins(currentUser.id) || 0;
-
                 document.getElementById('enrolledCount').textContent = enrolledCount;
                 document.getElementById('completedCount').textContent = completedCount;
                 document.getElementById('progressAvg').textContent = progressAvg + '%';
-                document.getElementById('coinsCount').textContent = userCoins;
                 
-                console.log('Dashboard stats updated:', { enrolledCount, completedCount, progressAvg, userCoins });
+                console.log('Dashboard stats updated:', { enrolledCount, completedCount, progressAvg });
             } catch (error) {
                 console.error('Error updating dashboard stats:', error);
                 // Set default values if error
                 document.getElementById('enrolledCount').textContent = '0';
                 document.getElementById('completedCount').textContent = '0';
                 document.getElementById('progressAvg').textContent = '0%';
-                document.getElementById('coinsCount').textContent = '0';
             }
         }
 
@@ -186,7 +162,6 @@
                             <div class="course-meta">
                                 <span>$${course.price}</span>
                                 <span>${course.duration_hours}h</span>
-                                <span>+${course.coins_reward || 10} 🪙</span>
                             </div>
                         </div>
                         <button class="btn btn-primary" onclick="enrollCourse(${course.id})">Enroll</button>
@@ -228,46 +203,12 @@
                             <div class="progress-fill" style="width: ${course.progress_percentage}%"></div>
                         </div>
                         <div class="progress-text">${course.progress_percentage}% Complete</div>
-                        <div class="course-coins">+${course.coins_reward || 10} 🪙 on completion</div>
-                        <button class="btn btn-small" onclick="updateProgress(${course.id})" style="width: 100%; margin-top: 0.5rem;">Update Progress</button>
+                        <button class="btn btn-small" onclick="updateProgress(${course.id})" style="width: 100%;">Update Progress</button>
                     </div>
                 `).join('');
             } catch (error) {
                 console.error('Error loading user courses:', error);
                 userCoursesContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Error loading your courses.</p>';
-            }
-        }
-
-        // Load recent coins history
-        async function loadRecentCoins() {
-            const currentUser = getCurrentUser();
-            if (!currentUser) return;
-
-            const recentCoinsContainer = document.getElementById('recentCoins');
-            
-            try {
-                const coinsHistory = await clientDB.getUserCoinsHistory(currentUser.id);
-                
-                if (coinsHistory.length === 0) {
-                    recentCoinsContainer.innerHTML = `
-                        <div class="no-coins">
-                            <p style="text-align: center; color: #94a3b8;">No coins earned yet.</p>
-                            <button class="btn btn-small btn-warning" onclick="earnCoins()" style="margin-top: 1rem; width: 100%;">Earn Coins Now</button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                recentCoinsContainer.innerHTML = coinsHistory.slice(0, 5).map(entry => `
-                    <div class="coin-history-item">
-                        <div class="coin-amount">+${entry.amount} 🪙</div>
-                        <div class="coin-reason">${entry.reason}</div>
-                        <div class="coin-date">${new Date(entry.timestamp).toLocaleDateString()}</div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading coins history:', error);
-                recentCoinsContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Error loading coin history.</p>';
             }
         }
 
@@ -323,17 +264,9 @@
                 if (progress !== null && progress >= 0 && progress <= 100) {
                     const success = await clientDB.updateCourseProgress(currentUser.id, courseId, parseInt(progress));
                     if (success) {
-                        // Check if course completed and award coins
-                        if (parseInt(progress) === 100) {
-                            const coinsAwarded = currentCourse.coins_reward || 10;
-                            await clientDB.addCoins(currentUser.id, coinsAwarded, `Completed course: ${currentCourse.title}`);
-                            alert(`✅ Progress updated! 🎉 You earned ${coinsAwarded} coins for completing the course!`);
-                        } else {
-                            alert('✅ Progress updated successfully!');
-                        }
+                        alert('✅ Progress updated successfully!');
                         await loadUserCourses();
                         await updateDashboardStats();
-                        await loadRecentCoins();
                     } else {
                         alert('❌ Failed to update progress.');
                     }
@@ -345,9 +278,9 @@
         }
 
         // View user profile
-        function viewProfile() {
-            window.location.href = 'profile.html';
-        }
+function viewProfile() {
+    window.location.href = 'profile.html';
+}
 
         // Browse courses
         function browseCourses() {
@@ -399,7 +332,6 @@
                 console.log('📊 Loading dashboard components...');
                 await loadCourses();
                 await loadUserCourses();
-                await loadRecentCoins();
                 await updateDashboardStats();
                 console.log('✅ Dashboard loaded successfully');
             } catch (error) {
@@ -407,127 +339,22 @@
                 alert('Error loading dashboard. Please refresh the page.');
             }
         });
+
+        // Debug function
+        function debugDashboard() {
+            console.log('=== DASHBOARD DEBUG ===');
+            console.log('Current User:', getCurrentUser());
+            console.log('Is Logged In:', isLoggedIn());
+            console.log('LocalStorage:', {
+                user_id: localStorage.getItem('user_id'),
+                user_email: localStorage.getItem('user_email'),
+                user_name: localStorage.getItem('user_name'),
+                user_role: localStorage.getItem('user_role')
+            });
+        }
     </script>
 
     <style>
-        :root {
-            --primary: #06b6d4;
-            --primary-dark: #0891b2;
-            --secondary: #7c3aed;
-            --warning: #f59e0b;
-            --success: #10b981;
-            --dark: #0f172a;
-            --light: #f1f5f9;
-            --gray: #94a3b8;
-            --card-bg: rgba(30, 41, 59, 0.8);
-            --border: rgba(255, 255, 255, 0.1);
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: var(--dark);
-            color: var(--light);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .loading-bar {
-            height: 4px;
-            width: 0;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            transition: width 0.3s ease;
-        }
-
-        .header {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 5%;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--light);
-            font-weight: 500;
-            transition: var(--transition);
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-            background: rgba(6, 182, 212, 0.1);
-        }
-
-        .user-welcome {
-            color: var(--primary);
-            font-weight: 500;
-        }
-
-        .logout-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .logout-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .container {
-            flex: 1;
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem 5%;
-        }
-
         .auth-message {
             display: flex;
             justify-content: center;
@@ -537,16 +364,15 @@
         }
 
         .message-content {
-            background: var(--card-bg);
+            background: rgba(255, 255, 255, 0.05);
             padding: 3rem;
             border-radius: 16px;
             border: 1px solid rgba(6, 182, 212, 0.3);
             max-width: 500px;
-            backdrop-filter: blur(10px);
         }
 
         .message-content h2 {
-            color: var(--primary);
+            color: #06b6d4;
             margin-bottom: 1rem;
         }
 
@@ -559,9 +385,10 @@
         .dashboard-header h1 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .dashboard-grid {
@@ -577,15 +404,6 @@
             }
         }
 
-        .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            margin-bottom: 1.5rem;
-        }
-
         .stats-card {
             background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.1));
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -593,18 +411,12 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
             margin-top: 1rem;
         }
 
-        @media (max-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: 1fr;
             }
@@ -613,29 +425,17 @@
         .stat-item {
             text-align: center;
             padding: 1.5rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .coins-stat {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1));
-            border: 1px solid rgba(245, 158, 11, 0.3);
         }
 
         .stat-number {
             font-size: 2.5rem;
             font-weight: bold;
-            color: var(--primary);
+            color: #06b6d4;
             margin-bottom: 0.5rem;
         }
 
-        .coins-stat .stat-number {
-            color: var(--warning);
-        }
-
         .stat-label {
-            color: var(--gray);
+            color: #94a3b8;
             font-size: 0.9rem;
         }
 
@@ -653,8 +453,8 @@
             padding: 1.5rem;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            transition: var(--transition);
-            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .course-card:hover {
@@ -681,12 +481,12 @@
 
         .course-info h4 {
             margin-bottom: 0.5rem;
-            color: var(--light);
+            color: #f1f5f9;
             font-size: 1.1rem;
         }
 
         .course-info p {
-            color: var(--gray);
+            color: #94a3b8;
             font-size: 0.9rem;
             margin-bottom: 0.5rem;
         }
@@ -696,11 +496,6 @@
             gap: 1rem;
             font-size: 0.8rem;
             color: #64748b;
-        }
-
-        .course-meta span:last-child {
-            color: var(--warning);
-            font-weight: bold;
         }
 
         .quick-links {
@@ -721,26 +516,15 @@
             text-decoration: none;
             color: #cbd5e1;
             text-align: center;
-            transition: var(--transition);
-            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .quick-link:hover {
             background: rgba(6, 182, 212, 0.1);
-            color: var(--primary);
+            color: #06b6d4;
             transform: translateY(-2px);
             border-color: rgba(6, 182, 212, 0.3);
-        }
-
-        .coins-link {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1));
-            border: 1px solid rgba(245, 158, 11, 0.3);
-            color: var(--warning);
-        }
-
-        .coins-link:hover {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2));
-            color: #fbbf24;
         }
 
         .user-course-item {
@@ -748,13 +532,13 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             margin-bottom: 1rem;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .course-title {
             font-weight: 500;
             margin-bottom: 1rem;
-            color: var(--light);
+            color: #f1f5f9;
         }
 
         .progress-bar {
@@ -768,24 +552,16 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
             border-radius: 4px;
             transition: width 0.5s ease;
         }
 
         .progress-text {
             font-size: 0.8rem;
-            color: var(--gray);
+            color: #94a3b8;
             text-align: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .course-coins {
-            font-size: 0.8rem;
-            color: var(--warning);
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         .action-buttons {
@@ -796,33 +572,29 @@
 
         .btn {
             display: inline-block;
-            padding: 12px 24px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: var(--transition);
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s ease;
             border: none;
             cursor: pointer;
             text-align: center;
-            font-size: 0.9rem;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(6, 182, 212, 0.3);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, #06b6d4, #7c3aed);
         }
 
         .btn-secondary {
             background: linear-gradient(135deg, #475569, #64748b);
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, var(--warning), #d97706);
         }
 
         .btn-small {
@@ -832,60 +604,14 @@
 
         .loading-courses {
             text-align: center;
-            color: var(--gray);
+            color: #94a3b8;
             padding: 2rem;
             font-style: italic;
         }
 
-        .no-courses, .no-coins {
+        .no-courses {
             text-align: center;
             padding: 2rem;
-        }
-
-        .coin-history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            border: 1px solid var(--border);
-        }
-
-        .coin-amount {
-            color: var(--warning);
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .coin-reason {
-            color: var(--gray);
-            font-size: 0.8rem;
-            flex: 1;
-            margin: 0 1rem;
-        }
-
-        .coin-date {
-            color: var(--gray);
-            font-size: 0.7rem;
-        }
-
-        .footer {
-            background: var(--dark);
-            color: white;
-            text-align: center;
-            padding: 1.5rem;
-            margin-top: auto;
-            border-top: 1px solid var(--border);
-        }
-
-        .text-muted {
-            color: var(--gray);
-        }
-
-        .mt-2 {
-            margin-top: 1rem;
         }
     </style>
     <script src="assets/js/central-db.js"></script>
