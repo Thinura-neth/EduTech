@@ -1,3 +1,4 @@
+// firebase-config.js
 const firebaseConfig = {
   apiKey: "AIzaSyBoZK_G8DWfNSKoKOnJZAWRr0gqDbL_mNU",
   authDomain: "edutech-database.firebaseapp.com",
@@ -10,4 +11,6 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
