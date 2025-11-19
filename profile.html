@@ -184,7 +184,7 @@
         <p>&copy; 2024 EduTech. All rights reserved.</p>
     </footer>
 
-    <script src="assets/js/database.js"></script>
+    <script src="assets/js/central-db.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
         // Load profile information
@@ -193,6 +193,8 @@
             if (!currentUser) return;
 
             try {
+                console.log('👤 Loading profile for user:', currentUser.id);
+                
                 // Update personal information
                 document.getElementById('profileName').textContent = currentUser.full_name || 'Not set';
                 document.getElementById('profileEmail').textContent = currentUser.email;
@@ -200,9 +202,9 @@
                 document.getElementById('profileJoinDate').textContent = new Date(currentUser.created_at).toLocaleDateString();
                 document.getElementById('profileUserId').textContent = currentUser.id;
                 
-                console.log('Profile info loaded for user:', currentUser.id);
+                console.log('✅ Profile info loaded successfully');
             } catch (error) {
-                console.error('Error loading profile info:', error);
+                console.error('❌ Error loading profile info:', error);
             }
         }
 
@@ -327,74 +329,6 @@
             document.getElementById('successMessage').style.display = 'none';
         }
 
-        // Update user name
-// Update user name - CORRECTED VERSION
-async function updateUserName(newName) {
-    const currentUser = getCurrentUser();
-    if (!currentUser) return false;
-
-    try {
-        console.log('Updating user name for user:', currentUser.id, 'New name:', newName);
-        
-        // Use the correct function from central-db.js
-        const success = await clientDB.updateUser(currentUser.id, {
-            full_name: newName,
-            updated_at: new Date().toISOString()
-        });
-        
-        if (success) {
-            // Update local storage and current user data
-            localStorage.setItem('user_name', newName);
-            currentUser.full_name = newName;
-            
-            // Update UI
-            document.getElementById('profileName').textContent = newName;
-            showSuccessMessage('✅ Name updated successfully!');
-            return true;
-        } else {
-            showSuccessMessage('❌ Failed to update name');
-            return false;
-        }
-    } catch (error) {
-        console.error('Error updating user name:', error);
-        showSuccessMessage('❌ Error updating name');
-        return false;
-    }
-}
-
-// Change user password - CORRECTED VERSION  
-async function changeUserPassword(currentPassword, newPassword) {
-    const currentUser = getCurrentUser();
-    if (!currentUser) return false;
-
-    try {
-        // First verify current password
-        const isValid = await clientDB.verifyUser(currentUser.email, currentPassword);
-        if (!isValid) {
-            alert('❌ Current password is incorrect!');
-            return false;
-        }
-
-        // Update password using updateUser function
-        const success = await clientDB.updateUser(currentUser.id, {
-            password: newPassword,
-            updated_at: new Date().toISOString()
-        });
-        
-        if (success) {
-            showSuccessMessage('✅ Password changed successfully!');
-            return true;
-        } else {
-            showSuccessMessage('❌ Failed to change password');
-            return false;
-        }
-    } catch (error) {
-        console.error('Error changing password:', error);
-        showSuccessMessage('❌ Error changing password');
-        return false;
-    }
-}
-
         // Go back to dashboard
         function goToDashboard() {
             window.location.href = 'dashboard.html';
@@ -443,26 +377,46 @@ async function changeUserPassword(currentPassword, newPassword) {
                 alert('Error loading profile. Please refresh the page.');
             }
 
-            // Edit Name Form Handler
+            // Edit Name Form Handler - CORRECTED VERSION
             document.getElementById('editNameForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                const newName = document.getElementById('newName').value.trim();
+                const nameInput = document.getElementById('newName');
+                const newName = nameInput.value.trim();
+                
+                console.log('🔄 Updating name to:', newName);
                 
                 if (!newName) {
                     alert('Please enter a valid name');
                     return;
                 }
 
-                const success = await updateUserName(newName);
-                if (success) {
-                    closeEditNameModal();
-                } else {
-                    alert('❌ Failed to update name. Please try again.');
+                try {
+                    const success = await clientDB.updateUser(getCurrentUser().id, {
+                        full_name: newName,
+                        updated_at: new Date().toISOString()
+                    });
+                    
+                    if (success) {
+                        // Update local storage
+                        localStorage.setItem('user_name', newName);
+                        // Update current user object
+                        getCurrentUser().full_name = newName;
+                        // Update UI
+                        document.getElementById('profileName').textContent = newName;
+                        
+                        showSuccessMessage('✅ Name updated successfully!');
+                        closeEditNameModal();
+                    } else {
+                        alert('❌ Failed to update name. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error updating name:', error);
+                    alert('❌ Error updating name. Please try again.');
                 }
             });
 
-            // Change Password Form Handler
+            // Change Password Form Handler - CORRECTED VERSION
             document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
@@ -470,6 +424,7 @@ async function changeUserPassword(currentPassword, newPassword) {
                 const newPassword = document.getElementById('newPassword').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
 
+                // Validation
                 if (newPassword.length < 6) {
                     alert('❌ Password must be at least 6 characters long');
                     return;
@@ -485,9 +440,29 @@ async function changeUserPassword(currentPassword, newPassword) {
                     return;
                 }
 
-                const success = await changeUserPassword(currentPassword, newPassword);
-                if (success) {
-                    closeChangePasswordModal();
+                try {
+                    // Verify current password
+                    const isValid = await clientDB.verifyUser(getCurrentUser().email, currentPassword);
+                    if (!isValid) {
+                        alert('❌ Current password is incorrect!');
+                        return;
+                    }
+
+                    // Update password
+                    const success = await clientDB.updateUser(getCurrentUser().id, {
+                        password: newPassword,
+                        updated_at: new Date().toISOString()
+                    });
+                    
+                    if (success) {
+                        showSuccessMessage('✅ Password changed successfully!');
+                        closeChangePasswordModal();
+                    } else {
+                        alert('❌ Failed to change password. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error changing password:', error);
+                    alert('❌ Error changing password. Please try again.');
                 }
             });
 
@@ -839,7 +814,5 @@ async function changeUserPassword(currentPassword, newPassword) {
             }
         }
     </style>
-    <script src="assets/js/central-db.js"></script>
-    <script src="assets/js/auth.js"></script>
 </body>
 </html>
