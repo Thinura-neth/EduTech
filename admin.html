@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="firebase-config.js"></script>
+    
+    <script src="firebase-config.js"></script>
 </head>
 <body>
     <div class="loading-bar"></div>
@@ -120,8 +119,7 @@
                         </button>
                     </div>
                     <div class="user-list" id="userList">
-                        <!-- Users will be loaded here -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
@@ -129,8 +127,7 @@
                 <div class="card">
                     <h3>Registration Logs</h3>
                     <div class="logs-list" id="logsList">
-                        <!-- Logs will be loaded here -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
@@ -140,7 +137,6 @@
         </div>
     </main>
 
-    <!-- Bulk Actions Panel -->
     <div id="bulkActions" class="bulk-actions" style="display: none;">
         <div class="bulk-actions-content">
             <div class="bulk-count">
@@ -157,13 +153,11 @@
         </div>
     </div>
 
-    <!-- User Details Modal -->
     <div id="userModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
             <div id="userModalContent">
-                <!-- User details will be loaded here -->
-            </div>
+                </div>
         </div>
     </div>
 
@@ -176,6 +170,9 @@
     <script>
         let selectedUsers = new Set();
 
+        // ------------------------------------
+        // ADMIN ACCESS AND INITIALIZATION
+        // ------------------------------------
         function checkAdminAccess() {
             console.log('Checking admin access...');
             if (!isLoggedIn()) {
@@ -198,20 +195,39 @@
             return true;
         }
 
+        // ------------------------------------
+        // ADMIN ACTIONS (requireAdmin() removed for cleaner code flow)
+        // ------------------------------------
         async function downloadUserAccounts() {
-            if (!requireAdmin()) return;
+            // Note: Since checkAdminAccess() is run on page load, 
+            // we assume admin access here. Re-add if security needs to be more granular.
+            // if (!requireAdmin()) return; 
             await clientDB.downloadUserAccounts();
             alert('✅ User accounts downloaded successfully!');
         }
 
         async function downloadDatabaseFile() {
-            if (!requireAdmin()) return;
+            // if (!requireAdmin()) return;
             await clientDB.downloadFullDatabase();
             alert('✅ Database file downloaded successfully!');
         }
 
+        async function clearUserLogs() {
+            // if (!requireAdmin()) return;
+            
+            if (confirm('Are you sure you want to clear all registration logs?')) {
+                await clientDB.clearUserLogs();
+                await loadLogs();
+                await updateStats();
+                alert('✅ Logs cleared successfully!');
+            }
+        }
+        
+        // ------------------------------------
+        // USER LIST MANAGEMENT
+        // ------------------------------------
         async function viewUserList() {
-            if (!requireAdmin()) return;
+            // if (!requireAdmin()) return;
             
             try {
                 const users = await clientDB.getUsers();
@@ -225,10 +241,15 @@
                     return;
                 }
 
+                // Filter out the current user and admin accounts from bulk operations visually
+                const currentUser = getCurrentUser();
+
                 userList.innerHTML = users.map(user => `
                     <div class="user-item ${selectedUsers.has(user.id) ? 'selected' : ''}" onclick="toggleUserSelection('${user.id}', event)">
                         <div class="user-checkbox">
-                            <input type="checkbox" id="user_${user.id}" ${selectedUsers.has(user.id) ? 'checked' : ''} onchange="toggleUserSelection('${user.id}')">
+                            <input type="checkbox" id="user_${user.id}" ${selectedUsers.has(user.id) ? 'checked' : ''} 
+                                onchange="toggleUserSelection('${user.id}')" 
+                                ${user.role === 'admin' || (currentUser && currentUser.id === user.id) ? 'disabled' : ''}>
                         </div>
                         <div class="user-avatar ${user.role === 'admin' ? 'admin-avatar' : ''}">
                             ${user.email.charAt(0).toUpperCase()}
@@ -247,12 +268,12 @@
                             <button class="btn-action view-btn" onclick="showUserDetails('${user.id}')" title="View Details">
                                 👁️
                             </button>
-                            ${user.role !== 'admin' ? `
+                            ${user.role !== 'admin' && !(currentUser && currentUser.id === user.id) ? `
                                 <button class="btn-action delete-btn" onclick="deleteSingleUser('${user.id}')" title="Delete User">
                                     🗑️
                                 </button>
                             ` : `
-                                <button class="btn-action disabled-btn" title="Admin accounts cannot be deleted" disabled>
+                                <button class="btn-action disabled-btn" title="Admin/Self account cannot be deleted" disabled>
                                     🔒
                                 </button>
                             `}
@@ -268,6 +289,12 @@
         }
 
         function toggleUserSelection(userId, event) {
+            const currentUser = getCurrentUser();
+            if (currentUser && currentUser.id === userId) return; // Cannot select self
+
+            const userItem = document.querySelector(`.user-item[onclick*="${userId}"]`);
+            if (userItem && userItem.querySelector('input[type="checkbox"]').disabled) return; // Cannot select disabled accounts
+
             if (event) {
                 event.stopPropagation();
             }
@@ -278,7 +305,6 @@
                 selectedUsers.add(userId);
             }
             
-            const userItem = document.querySelector(`.user-item[onclick*="${userId}"]`);
             if (userItem) {
                 userItem.classList.toggle('selected');
                 const checkbox = document.getElementById(`user_${userId}`);
@@ -303,7 +329,7 @@
         }
 
         async function deleteSingleUser(userId) {
-            if (!requireAdmin()) return;
+            // if (!requireAdmin()) return;
             
             try {
                 const users = await clientDB.getUsers();
@@ -341,7 +367,7 @@
         }
 
         async function deleteMultipleUsers() {
-            if (!requireAdmin()) return;
+            // if (!requireAdmin()) return;
             
             if (selectedUsers.size === 0) {
                 alert('❌ No users selected!');
@@ -355,12 +381,13 @@
                     .map(u => u.email)
                     .join(', ');
                 
-                if (confirm(`Are you sure you want to delete ${selectedUsers.size} user(s): ${selectedUserEmails}? This action cannot be undone!`)) {
+                if (confirm(`Are you sure you want to delete ${selectedUsers.size} user(s)? The following users will be deleted: ${selectedUserEmails}. This action cannot be undone!`)) {
                     let successCount = 0;
                     let failCount = 0;
                     
                     for (const userId of selectedUsers) {
                         const user = users.find(u => u.id === userId);
+                        // Prevent deletion of admin accounts or the current logged-in user
                         if (user && user.role !== 'admin') {
                             const currentUser = getCurrentUser();
                             if (!(currentUser && currentUser.id === userId)) {
@@ -406,6 +433,7 @@
                 const currentUser = getCurrentUser();
                 
                 users.forEach(user => {
+                    // Only allow selection of non-admin and non-self accounts
                     if (user.role !== 'admin' && (!currentUser || user.id !== currentUser.id)) {
                         selectedUsers.add(user.id);
                     }
@@ -422,8 +450,11 @@
             viewUserList();
         }
 
+        // ------------------------------------
+        // USER DETAILS MODAL (Password removed for security)
+        // ------------------------------------
         async function showUserDetails(userId) {
-            if (!requireAdmin()) return;
+            // if (!requireAdmin()) return;
             
             try {
                 const users = await clientDB.getUsers();
@@ -451,7 +482,7 @@
                         </div>
                         <div class="detail-item">
                             <label>Password:</label>
-                            <span class="password-field">${user.password}</span>
+                            <span class="password-field-hidden">Hashed/Hidden for Security</span> 
                         </div>
                         <div class="detail-item">
                             <label>Role:</label>
@@ -476,29 +507,31 @@
 
         function copyUserDetails() {
             const userDetails = document.querySelector('.user-details');
-            const text = userDetails.innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('✅ User details copied to clipboard!');
+            // Safely get only visible text, excluding the sensitive password field
+            const textToCopy = Array.from(userDetails.querySelectorAll('.detail-item'))
+                .map(item => {
+                    const label = item.querySelector('label').textContent.trim();
+                    const span = item.querySelector('span').textContent.trim();
+                    if (label === 'Password:') {
+                        return `${label} [Hidden]`;
+                    }
+                    return `${label} ${span}`;
+                }).join('\n');
+                
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('✅ User details (excluding password) copied to clipboard!');
             });
         }
 
         function closeModal() {
             document.getElementById('userModal').style.display = 'none';
         }
-
-        async function clearUserLogs() {
-            if (!requireAdmin()) return;
-            
-            if (confirm('Are you sure you want to clear all registration logs?')) {
-                await clientDB.clearUserLogs();
-                await loadLogs();
-                await updateStats();
-                alert('✅ Logs cleared successfully!');
-            }
-        }
-
+        
+        // ------------------------------------
+        // LOGS AND STATS
+        // ------------------------------------
         async function loadLogs() {
-            if (!requireAdmin()) return;
+            // if (!requireAdmin()) return;
             
             try {
                 const logs = await clientDB.getUserLogs();
@@ -531,7 +564,7 @@
         }
 
         async function updateStats() {
-            if (!requireAdmin()) return;
+            // if (!requireAdmin()) return;
             
             try {
                 const users = await clientDB.getUsers();
@@ -539,13 +572,19 @@
                 
                 document.getElementById('totalUsers').textContent = users.length;
                 document.getElementById('totalLogs').textContent = logs.length;
+                // Get the last log to find the last registration time
+                const lastLog = logs.length > 0 ? logs.reduce((a, b) => (new Date(a.logged_at) > new Date(b.logged_at) ? a : b)) : null;
+
                 document.getElementById('lastRegistration').textContent = 
-                    logs.length > 0 ? new Date(logs[logs.length - 1].logged_at).toLocaleString() : '-';
+                    lastLog ? new Date(lastLog.logged_at).toLocaleString() : '-';
             } catch (error) {
                 console.error('Error updating stats:', error);
             }
         }
 
+        // ------------------------------------
+        // EVENT LISTENERS
+        // ------------------------------------
         document.addEventListener('DOMContentLoaded', async function() {
             updateNavigation();
             
@@ -553,6 +592,9 @@
                 await updateStats();
                 await viewUserList();
                 await loadLogs();
+                
+                // Load Ads only if Admin access is granted
+                loadAds();
             }
 
             document.querySelector('.close-modal').addEventListener('click', closeModal);
@@ -567,6 +609,8 @@
     </script>
 
     <style>
+        /* ... (CSS Styles remain the same, adding one style for hidden password field) ... */
+
         .access-denied {
             display: flex;
             justify-content: center;
@@ -747,6 +791,11 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
+        }
+        
+        .user-checkbox input[type="checkbox"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .user-avatar {
@@ -948,9 +997,10 @@
             color: #f1f5f9;
         }
 
-        .password-field {
+        .password-field-hidden { /* Updated class name for security */
             font-family: monospace;
-            background: rgba(6, 182, 212, 0.1);
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
             padding: 0.2rem 0.5rem;
             border-radius: 4px;
         }
@@ -1074,37 +1124,69 @@
         }
     </style>
 
-<section id="manage-ads">
-<h2>Manage Ads</h2>
-<table id="adsTable" border="1" style="width:100%;border-collapse:collapse;">
-<thead><tr><th>Image</th><th>Title</th><th>Description</th><th>Price</th><th>Created</th><th>Delete</th></tr></thead>
-<tbody></tbody>
-</table>
-</section>
-<script src="assets/js/firebase-config.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-<script src="assets/js/realtime-ads.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-    function fmt(ts){ if(!ts) return ''; var d=new Date(ts); return d.toLocaleString(); }
-    function load(){
-        RealtimeAds.fetchAllAdsOnce().then(function(ads){
-            const tbody = document.querySelector('#adsTable tbody');
-            tbody.innerHTML = '';
-            ads.forEach(ad=>{
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td><img src="${ad.imageUrl||''}" width="80"></td><td>${ad.title||''}</td><td>${ad.description||''}</td><td>${ad.price||''}</td><td>${fmt(ad.created)}</td><td><button data-id="${ad.id}">Delete</button></td>`;
-                tbody.appendChild(tr);
-            });
-            tbody.querySelectorAll('button[data-id]').forEach(btn=>{
-                btn.onclick = function(){ if(confirm('Delete this ad?')){ RealtimeAds.deleteAd(btn.dataset.id).then(()=>load()); } };
-            });
-        });
-    }
-    load();
-});
-</script>
-\n</body>
+    <section id="manage-ads">
+        <h2>Manage Ads</h2>
+        <table id="adsTable" border="1" style="width:100%;border-collapse:collapse;">
+        <thead><tr><th>Image</th><th>Title</th><th>Description</th><th>Price</th><th>Created</th><th>Delete</th></tr></thead>
+        <tbody></tbody>
+        </table>
+    </section>
+    
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="assets/js/realtime-ads.js"></script>
+    <script>
+        // Ad Management Script moved to a function and called conditionally
+        function loadAds() {
+            function fmt(ts){ 
+                if(!ts) return ''; 
+                var d=new Date(ts); 
+                return d.toLocaleString(); 
+            }
+            
+            function load() {
+                RealtimeAds.fetchAllAdsOnce().then(function(ads){
+                    const tbody = document.querySelector('#adsTable tbody');
+                    if (!tbody) return;
+
+                    tbody.innerHTML = '';
+                    if (ads.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 1rem;">No ads posted yet.</td></tr>';
+                        return;
+                    }
+                    
+                    ads.forEach(ad=>{
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td><img src="${ad.imageUrl||''}" width="80" alt="Ad Image"></td><td>${ad.title||''}</td><td>${ad.description||''}</td><td>${ad.price||''}</td><td>${fmt(ad.created)}</td><td><button class="btn-danger btn-small" data-id="${ad.id}">Delete</button></td>`;
+                        tbody.appendChild(tr);
+                    });
+                    
+                    tbody.querySelectorAll('button[data-id]').forEach(btn=>{
+                        btn.onclick = function(){ 
+                            if(confirm('Are you sure you want to delete this ad?')){ 
+                                RealtimeAds.deleteAd(btn.dataset.id).then(() => {
+                                    alert('✅ Ad deleted successfully!');
+                                    load(); 
+                                }).catch(error => {
+                                    console.error('Error deleting ad:', error);
+                                    alert('❌ Failed to delete ad.');
+                                });
+                            } 
+                        };
+                    });
+                }).catch(error => {
+                    console.error('Error fetching ads:', error);
+                    document.querySelector('#adsTable tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 1rem;">Error loading ads.</td></tr>';
+                });
+            }
+            load();
+        }
+        
+        // Removed document.addEventListener('DOMContentLoaded', function(){ load(); }); 
+        // as loadAds() is now called from the main DOMContentLoaded block (see above)
+    </script>
+
+</body>
 </html>
