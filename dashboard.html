@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="firebase-config.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
 </head>
 <body>
     <div class="loading-bar"></div>
@@ -111,9 +112,10 @@
     <footer class="footer">
         <p>&copy; 2024 EduTech. All rights reserved.</p>
     </footer>
-
-    <script src="assets/js/database.js"></script>
+    
+    <script src="assets/js/central-db.js"></script>
     <script src="assets/js/auth.js"></script>
+    
     <script>
         // Update dashboard stats
         async function updateDashboardStats() {
@@ -121,6 +123,7 @@
             if (!currentUser) return;
 
             try {
+                // clientDB.getUserEnrolledCourses භාවිතා කිරීම
                 const userCourses = await clientDB.getUserEnrolledCourses(currentUser.id);
                 const enrolledCount = userCourses.length;
                 const completedCount = userCourses.filter(course => course.progress_percentage === 100).length;
@@ -148,6 +151,7 @@
             
             try {
                 console.log('Loading available courses...');
+                // clientDB.getCourses භාවිතා කිරීම
                 const courses = await clientDB.getCourses();
                 
                 if (courses.length === 0) {
@@ -185,6 +189,7 @@
             
             try {
                 console.log('Loading user courses for user:', currentUser.id);
+                // clientDB.getUserEnrolledCourses භාවිතා කිරීම
                 const userCourses = await clientDB.getUserEnrolledCourses(currentUser.id);
                 
                 console.log('User courses found:', userCourses.length);
@@ -226,6 +231,7 @@
             const currentUser = getCurrentUser();
             
             try {
+                // clientDB.getCourses සහ clientDB.enrollUserInCourse භාවිතා කිරීම
                 const courses = await clientDB.getCourses();
                 const course = courses.find(c => c.id === courseId);
                 
@@ -254,6 +260,7 @@
             const currentUser = getCurrentUser();
             
             try {
+                // clientDB.getUserEnrolledCourses සහ clientDB.updateCourseProgress භාවිතා කිරීම
                 const userCourses = await clientDB.getUserEnrolledCourses(currentUser.id);
                 const currentCourse = userCourses.find(course => course.id === courseId);
                 
@@ -281,9 +288,9 @@
         }
 
         // View user profile
-function viewProfile() {
-    window.location.href = 'profile.html';
-}
+        function viewProfile() {
+            window.location.href = 'profile.html';
+        }
 
         // Browse courses
         function browseCourses() {
@@ -323,10 +330,17 @@ function viewProfile() {
                 const userName = user.full_name || user.email.split('@')[0];
                 welcomeMessage.textContent = `Welcome back, ${userName}! Manage your learning journey and track your progress.`;
                 
-                // Show admin link if user is admin
+                // 🛠️ නිවැරදි කළ පරිපාලක සබැඳි දෘශ්‍යතා කේතය: සියලුම සබැඳි පෙන්වීම
                 if (user.role === 'admin') {
-                    document.querySelector('.admin-link').style.display = 'block';
-                    console.log('🔧 Admin link shown');
+                    // 1. Navigation bar එකේ Admin link එක පෙන්වීම (ID මගින්)
+                    document.getElementById('adminLink').style.display = 'block';
+                    
+                    // 2. Quick Access links සියල්ල පෙන්වීම (Class මගින්)
+                    document.querySelectorAll('.admin-link').forEach(link => {
+                        link.style.display = 'block';
+                    });
+                    
+                    console.log('🔧 Admin links shown');
                 }
             }
             
@@ -617,7 +631,5 @@ function viewProfile() {
             padding: 2rem;
         }
     </style>
-    <script src="assets/js/central-db.js"></script>
-    <script src="assets/js/auth.js"></script>
 </body>
 </html>
