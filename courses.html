@@ -5,9 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Courses - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="firebase-config.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
+    <style>
+        /* Specific Styles for Courses Page */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .course-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .course-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .course-info {
+            padding: 1.5rem;
+        }
+
+        .course-info h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .course-meta span i {
+            margin-right: 0.3rem;
+            color: var(--secondary);
+        }
+
+        .course-description {
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+            min-height: 75px; /* Ensure consistent card height */
+        }
+
+        .course-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .course-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--success);
+        }
+
+        .course-level {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--primary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
     <div class="loading-bar"></div>
@@ -18,6 +100,7 @@
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
                 <li><a href="login.html" id="loginLink">Login</a></li>
                 <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
                 <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
@@ -31,14 +114,76 @@
             <p>Choose from our wide range of interactive courses designed for your success</p>
         </div>
 
-        <div class="card">
-            <div class="course-grid" id="coursesContainer">
-                <div class="loading-courses">Loading courses...</div>
+        <div class="courses-grid">
+            
+            <div class="course-card">
+                <div class="course-image" style="background-image: url('assets/images/course-webdev.jpg');"></div>
+                <div class="course-info">
+                    <h3>Full Stack Web Development</h3>
+                    <div class="course-meta">
+                        <span><i class="fas fa-layer-group"></i> 12 Modules</span>
+                        <span><i class="fas fa-user-clock"></i> 80 Hours</span>
+                    </div>
+                    <p class="course-description">Master the MERN stack (MongoDB, Express, React, Node.js) to build and deploy modern, scalable web applications from scratch.</p>
+                    <div class="course-footer">
+                        <span class="course-price">$499</span>
+                        <span class="course-level">Advanced</span>
+                        <a href="dashboard.html" class="btn btn-small">Enroll Now</a>
+                    </div>
+                </div>
             </div>
 
-            <div style="text-align: center; margin-top: 2rem;">
-                <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+            <div class="course-card">
+                <div class="course-image" style="background-image: url('assets/images/course-data.jpg');"></div>
+                <div class="course-info">
+                    <h3>Data Science & ML Bootcamp</h3>
+                    <div class="course-meta">
+                        <span><i class="fas fa-layer-group"></i> 10 Modules</span>
+                        <span><i class="fas fa-user-clock"></i> 60 Hours</span>
+                    </div>
+                    <p class="course-description">Learn Python, Pandas, Scikit-learn, and TensorFlow to analyze data, build predictive models, and implement machine learning solutions.</p>
+                    <div class="course-footer">
+                        <span class="course-price">$599</span>
+                        <span class="course-level">Expert</span>
+                        <a href="dashboard.html" class="btn btn-small">Enroll Now</a>
+                    </div>
+                </div>
             </div>
+            
+            <div class="course-card">
+                <div class="course-image" style="background-image: url('assets/images/course-mobile.jpg');"></div>
+                <div class="course-info">
+                    <h3>Flutter Mobile App Development</h3>
+                    <div class="course-meta">
+                        <span><i class="fas fa-layer-group"></i> 8 Modules</span>
+                        <span><i class="fas fa-user-clock"></i> 45 Hours</span>
+                    </div>
+                    <p class="course-description">Build beautiful, natively compiled applications for mobile, web, and desktop from a single codebase using Google's Flutter framework and Dart language.</p>
+                    <div class="course-footer">
+                        <span class="course-price">$399</span>
+                        <span class="course-level">Intermediate</span>
+                        <a href="dashboard.html" class="btn btn-small">Enroll Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <div class="course-image" style="background-image: url('assets/images/course-design.jpg');"></div>
+                <div class="course-info">
+                    <h3>UI/UX Design Masterclass</h3>
+                    <div class="course-meta">
+                        <span><i class="fas fa-layer-group"></i> 6 Modules</span>
+                        <span><i class="fas fa-user-clock"></i> 30 Hours</span>
+                    </div>
+                    <p class="course-description">Learn the principles of user-centered design, prototyping with Figma, and creating seamless user experiences that drive engagement.</p>
+                    <div class="course-footer">
+                        <span class="course-price">$299</span>
+                        <span class="course-level">Beginner</span>
+                        <a href="dashboard.html" class="btn btn-small">Enroll Now</a>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
@@ -46,238 +191,12 @@
         <p>&copy; 2024 EduTech. All rights reserved.</p>
     </footer>
 
-    <script src="assets/js/database.js"></script>
-    <script src="assets/js/auth.js"></script>
-    <script>
-        async function loadAllCourses() {
-            const coursesContainer = document.getElementById('coursesContainer');
-            
-            try {
-                console.log('Loading all courses...');
-                const courses = await clientDB.getCourses();
-                
-                if (courses.length === 0) {
-                    coursesContainer.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 3rem;">No courses available at the moment. Please check back later.</p>';
-                    return;
-                }
-
-                console.log('Courses loaded:', courses.length);
-                coursesContainer.innerHTML = courses.map(course => `
-                    <div class="course-card-large">
-                        <div class="course-header">
-                            <div class="course-icon-large">${course.image || '📚'}</div>
-                            <div class="course-badge">Popular</div>
-                        </div>
-                        <div class="course-content">
-                            <h3>${course.title}</h3>
-                            <p class="course-description">${course.description}</p>
-                            <div class="course-features">
-                                <div class="feature">
-                                    <span class="feature-icon">⏱️</span>
-                                    <span>${course.duration_hours} hours</span>
-                                </div>
-                                <div class="feature">
-                                    <span class="feature-icon">💼</span>
-                                    <span>Certificate</span>
-                                </div>
-                                <div class="feature">
-                                    <span class="feature-icon">🔄</span>
-                                    <span>Lifetime Access</span>
-                                </div>
-                            </div>
-                            <div class="course-meta-large">
-                                <div class="price">$${course.price}</div>
-                                <div class="level">Beginner to Advanced</div>
-                            </div>
-                        </div>
-                        <div class="course-actions">
-                            <button class="btn btn-primary" onclick="enrollFromCourses(${course.id})">Enroll Now</button>
-                            <button class="btn btn-secondary" onclick="viewCourseDetails(${course.id})">Learn More</button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading courses:', error);
-                coursesContainer.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 3rem;">Error loading courses. Please try refreshing the page.</p>';
-            }
-        }
-
-        async function enrollFromCourses(courseId) {
-            if (!isLoggedIn()) {
-                alert('Please login first to enroll in courses.');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const currentUser = getCurrentUser();
-            
-            try {
-                const courses = await clientDB.getCourses();
-                const course = courses.find(c => c.id === courseId);
-                
-                if (!course) {
-                    alert('Course not found.');
-                    return;
-                }
-
-                const success = await clientDB.enrollUserInCourse(currentUser.id, courseId);
-                
-                if (success) {
-                    alert(`✅ Successfully enrolled in "${course.title}"!`);
-                    // Optional: Redirect to dashboard
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1500);
-                } else {
-                    alert('⚠️ You are already enrolled in this course.');
-                }
-            } catch (error) {
-                console.error('Error enrolling in course:', error);
-                alert('❌ Failed to enroll in course. Please try again.');
-            }
-        }
-
-        function viewCourseDetails(courseId) {
-            alert('Course details feature coming soon! For now, you can enroll directly.');
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            updateNavigation();
-            loadAllCourses();
-        });
-    </script>
-
-    <style>
-        .course-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .course-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .course-card-large {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .course-card-large:hover {
-            transform: translateY(-8px);
-            border-color: rgba(6, 182, 212, 0.3);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .course-header {
-            position: relative;
-            padding: 2rem;
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.1));
-            text-align: center;
-        }
-
-        .course-icon-large {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .course-badge {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: linear-gradient(135deg, #06b6d4, #7c3aed);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .course-content {
-            padding: 2rem;
-        }
-
-        .course-content h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #f1f5f9;
-        }
-
-        .course-description {
-            color: #94a3b8;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        .course-features {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1.5rem;
-            padding: 1rem 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .feature {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #cbd5e1;
-            font-size: 0.9rem;
-        }
-
-        .feature-icon {
-            font-size: 1.2rem;
-        }
-
-        .course-meta-large {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .price {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #06b6d4;
-        }
-
-        .level {
-            background: rgba(6, 182, 212, 0.1);
-            color: #06b6d4;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .course-actions {
-            padding: 0 2rem 2rem 2rem;
-            display: flex;
-            gap: 1rem;
-        }
-
-        .course-actions .btn {
-            flex: 1;
-        }
-
-        .loading-courses {
-            text-align: center;
-            color: #94a3b8;
-            padding: 3rem;
-            font-size: 1.1rem;
-            grid-column: 1 / -1;
-        }
-    </style>
     <script src="assets/js/central-db.js"></script>
     <script src="assets/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+        });
+    </script>
 </body>
 </html>

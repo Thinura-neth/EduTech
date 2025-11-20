@@ -5,403 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="firebase-config.js"></script>
-</head>
-<body>
-    <div class="loading-bar"></div>
-    
-    <header class="header">
-        <nav class="nav">
-            <div class="logo">EduTech Dashboard</div>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
-                <li><a href="login.html" id="loginLink">Login</a></li>
-                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
-                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main class="container">
-        <div id="authMessage" class="auth-message" style="display: none;">
-            <div class="message-content">
-                <h2>🔐 Please Login to Access Dashboard</h2>
-                <p>You need to be logged in to view your learning dashboard and access courses.</p>
-                <a href="login.html" class="btn btn-primary">Login Now</a>
-                <p class="text-muted mt-2">Don't have an account? <a href="login.html" style="color: #06b6d4;">Register here</a></p>
-            </div>
-        </div>
-
-        <div id="dashboardContent" style="display: none;">
-            <div class="dashboard-header">
-                <h1>Welcome to Your Dashboard</h1>
-                <p id="welcomeMessage">Manage your learning journey and track your progress</p>
-            </div>
-
-            <div class="dashboard-grid">
-                <div class="main-content">
-                    <div class="stats-card card">
-                        <h3>📊 Your Learning Stats</h3>
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <div class="stat-number" id="enrolledCount">0</div>
-                                <div class="stat-label">Courses Enrolled</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="progressAvg">0%</div>
-                                <div class="stat-label">Average Progress</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="completedCount">0</div>
-                                <div class="stat-label">Completed</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>🎯 Available Courses</h3>
-                        <div class="courses-grid" id="coursesGrid">
-                            <div class="loading-courses">Loading courses...</div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>🔧 Quick Access</h3>
-                        <div class="quick-links">
-                            <a href="education.html" class="quick-link">📚 Education</a>
-                            <a href="courses.html" class="quick-link">🎓 Courses</a>
-                            <a href="services.html" class="quick-link">⚡ Services</a>
-                            <a href="pricing.html" class="quick-link">💰 Pricing</a>
-                            <a href="gallery.html" class="quick-link">🖼️ Gallery</a>
-                            <a href="blog.html" class="quick-link">📝 Blog</a>
-                            <a href="contact.html" class="quick-link">📞 Contact</a>
-                            <a href="post-ad.html" class="quick-link">📦 Post Ad</a>
-                            <a href="marketplace.html" class="quick-link">🛍️ Marketplace</a>
-                            <a href="ads-manager.html" class="quick-link admin-link" style="display: none;">📊 Ads Manager</a>
-                            <a href="admin.html" class="quick-link admin-link" style="display: none;">🔧 Admin Panel</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sidebar">
-                    <div class="card">
-                        <h3>📈 Your Courses</h3>
-                        <div id="userCourses">
-                            <div class="loading-courses">Loading your courses...</div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>⚡ Quick Actions</h3>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary" onclick="viewProfile()">View Profile</button>
-                            <button class="btn btn-secondary" onclick="browseCourses()">Browse Courses</button>
-                            <button class="btn btn-secondary" onclick="contactSupport()">Contact Support</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer class="footer">
-        <p>&copy; 2024 EduTech. All rights reserved.</p>
-    </footer>
-    
-    <script src="assets/js/central-db.js"></script>
-    <script src="assets/js/auth.js"></script>
-    
-    <script>
-        // Update dashboard stats
-        async function updateDashboardStats() {
-            const currentUser = getCurrentUser();
-            if (!currentUser) return;
-
-            try {
-                // clientDB.getUserEnrolledCourses භාවිතා කිරීම
-                const userCourses = await clientDB.getUserEnrolledCourses(currentUser.id);
-                const enrolledCount = userCourses.length;
-                const completedCount = userCourses.filter(course => course.progress_percentage === 100).length;
-                const progressAvg = userCourses.length > 0 
-                    ? Math.round(userCourses.reduce((sum, course) => sum + course.progress_percentage, 0) / userCourses.length)
-                    : 0;
-
-                document.getElementById('enrolledCount').textContent = enrolledCount;
-                document.getElementById('completedCount').textContent = completedCount;
-                document.getElementById('progressAvg').textContent = progressAvg + '%';
-                
-                console.log('Dashboard stats updated:', { enrolledCount, completedCount, progressAvg });
-            } catch (error) {
-                console.error('Error updating dashboard stats:', error);
-                // Set default values if error
-                document.getElementById('enrolledCount').textContent = '0';
-                document.getElementById('completedCount').textContent = '0';
-                document.getElementById('progressAvg').textContent = '0%';
-            }
-        }
-
-        // Load available courses
-        async function loadCourses() {
-            const coursesGrid = document.getElementById('coursesGrid');
-            
-            try {
-                console.log('Loading available courses...');
-                // clientDB.getCourses භාවිතා කිරීම
-                const courses = await clientDB.getCourses();
-                
-                if (courses.length === 0) {
-                    coursesGrid.innerHTML = '<p style="text-align: center; color: #94a3b8;">No courses available at the moment.</p>';
-                    return;
-                }
-
-                console.log('Courses loaded:', courses.length);
-                coursesGrid.innerHTML = courses.map(course => `
-                    <div class="course-card">
-                        <div class="course-icon">${course.image || '📚'}</div>
-                        <div class="course-info">
-                            <h4>${course.title}</h4>
-                            <p>${course.description}</p>
-                            <div class="course-meta">
-                                <span>$${course.price}</span>
-                                <span>${course.duration_hours}h</span>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary" onclick="enrollCourse(${course.id})">Enroll</button>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading courses:', error);
-                coursesGrid.innerHTML = '<p style="text-align: center; color: #ef4444;">Error loading courses. Please try again.</p>';
-            }
-        }
-
-        // Load user's enrolled courses
-        async function loadUserCourses() {
-            const currentUser = getCurrentUser();
-            if (!currentUser) return;
-
-            const userCoursesContainer = document.getElementById('userCourses');
-            
-            try {
-                console.log('Loading user courses for user:', currentUser.id);
-                // clientDB.getUserEnrolledCourses භාවිතා කිරීම
-                const userCourses = await clientDB.getUserEnrolledCourses(currentUser.id);
-                
-                console.log('User courses found:', userCourses.length);
-                
-                if (userCourses.length === 0) {
-                    userCoursesContainer.innerHTML = `
-                        <div class="no-courses">
-                            <p style="text-align: center; color: #94a3b8;">No courses enrolled yet.</p>
-                            <button class="btn btn-small" onclick="browseCourses()" style="margin-top: 1rem; width: 100%;">Browse Courses</button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                userCoursesContainer.innerHTML = userCourses.map(course => `
-                    <div class="user-course-item">
-                        <div class="course-title">${course.title}</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${course.progress_percentage}%"></div>
-                        </div>
-                        <div class="progress-text">${course.progress_percentage}% Complete</div>
-                        <button class="btn btn-small" onclick="updateProgress(${course.id})" style="width: 100%;">Update Progress</button>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading user courses:', error);
-                userCoursesContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Error loading your courses.</p>';
-            }
-        }
-
-        // Enroll in a course
-        async function enrollCourse(courseId) {
-            if (!isLoggedIn()) {
-                alert('Please login first to enroll in courses.');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const currentUser = getCurrentUser();
-            
-            try {
-                // clientDB.getCourses සහ clientDB.enrollUserInCourse භාවිතා කිරීම
-                const courses = await clientDB.getCourses();
-                const course = courses.find(c => c.id === courseId);
-                
-                if (!course) {
-                    alert('Course not found.');
-                    return;
-                }
-
-                const success = await clientDB.enrollUserInCourse(currentUser.id, courseId);
-                
-                if (success) {
-                    alert(`✅ Successfully enrolled in "${course.title}"!`);
-                    await loadUserCourses();
-                    await updateDashboardStats();
-                } else {
-                    alert('⚠️ You are already enrolled in this course.');
-                }
-            } catch (error) {
-                console.error('Error enrolling in course:', error);
-                alert('❌ Failed to enroll in course. Please try again.');
-            }
-        }
-
-        // Update course progress
-        async function updateProgress(courseId) {
-            const currentUser = getCurrentUser();
-            
-            try {
-                // clientDB.getUserEnrolledCourses සහ clientDB.updateCourseProgress භාවිතා කිරීම
-                const userCourses = await clientDB.getUserEnrolledCourses(currentUser.id);
-                const currentCourse = userCourses.find(course => course.id === courseId);
-                
-                if (!currentCourse) {
-                    alert('Course not found in your enrollments.');
-                    return;
-                }
-                
-                const progress = prompt(`Enter your progress percentage (0-100) for "${currentCourse.title}":`, currentCourse.progress_percentage);
-                
-                if (progress !== null && progress >= 0 && progress <= 100) {
-                    const success = await clientDB.updateCourseProgress(currentUser.id, courseId, parseInt(progress));
-                    if (success) {
-                        alert('✅ Progress updated successfully!');
-                        await loadUserCourses();
-                        await updateDashboardStats();
-                    } else {
-                        alert('❌ Failed to update progress.');
-                    }
-                }
-            } catch (error) {
-                console.error('Error updating progress:', error);
-                alert('❌ Error updating progress. Please try again.');
-            }
-        }
-
-        // View user profile
-        function viewProfile() {
-            window.location.href = 'profile.html';
-        }
-
-        // Browse courses
-        function browseCourses() {
-            window.location.href = 'courses.html';
-        }
-
-        // Contact support
-        function contactSupport() {
-            window.location.href = 'contact.html';
-        }
-
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🏠 Dashboard loading...');
-            
-            // Update navigation first
-            updateNavigation();
-            
-            // Check if user is logged in
-            if (!isLoggedIn()) {
-                console.log('❌ User not logged in, showing auth message');
-                document.getElementById('authMessage').style.display = 'block';
-                document.getElementById('dashboardContent').style.display = 'none';
-                return;
-            }
-
-            console.log('✅ User is logged in, loading dashboard content');
-            
-            // User is logged in, show dashboard content
-            document.getElementById('authMessage').style.display = 'none';
-            document.getElementById('dashboardContent').style.display = 'block';
-            
-            // Update welcome message with user's name
-            const user = getCurrentUser();
-            if (user) {
-                const welcomeMessage = document.getElementById('welcomeMessage');
-                const userName = user.full_name || user.email.split('@')[0];
-                welcomeMessage.textContent = `Welcome back, ${userName}! Manage your learning journey and track your progress.`;
-                
-                // 🛠️ නිවැරදි කළ පරිපාලක සබැඳි දෘශ්‍යතා කේතය: සියලුම සබැඳි පෙන්වීම
-                if (user.role === 'admin') {
-                    // 1. Navigation bar එකේ Admin link එක පෙන්වීම (ID මගින්)
-                    document.getElementById('adminLink').style.display = 'block';
-                    
-                    // 2. Quick Access links සියල්ල පෙන්වීම (Class මගින්)
-                    document.querySelectorAll('.admin-link').forEach(link => {
-                        link.style.display = 'block';
-                    });
-                    
-                    console.log('🔧 Admin links shown');
-                }
-            }
-            
-            // Load dashboard content
-            try {
-                console.log('📊 Loading dashboard components...');
-                await loadCourses();
-                await loadUserCourses();
-                await updateDashboardStats();
-                console.log('✅ Dashboard loaded successfully');
-            } catch (error) {
-                console.error('❌ Dashboard initialization error:', error);
-                alert('Error loading dashboard. Please refresh the page.');
-            }
-        });
-
-        // Debug function
-        function debugDashboard() {
-            console.log('=== DASHBOARD DEBUG ===');
-            console.log('Current User:', getCurrentUser());
-            console.log('Is Logged In:', isLoggedIn());
-            console.log('LocalStorage:', {
-                user_id: localStorage.getItem('user_id'),
-                user_email: localStorage.getItem('user_email'),
-                user_name: localStorage.getItem('user_name'),
-                user_role: localStorage.getItem('user_role')
-            });
-        }
-    </script>
-
     <style>
-        .auth-message {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 60vh;
-            text-align: center;
-        }
-
-        .message-content {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 3rem;
-            border-radius: 16px;
-            border: 1px solid rgba(6, 182, 212, 0.3);
-            max-width: 500px;
-        }
-
-        .message-content h2 {
-            color: #06b6d4;
-            margin-bottom: 1rem;
-        }
-
+        /* Specific Styles from dashboard.html inline style block */
         .dashboard-header {
             text-align: center;
             margin-bottom: 3rem;
-            padding: 2rem 0;
         }
 
         .dashboard-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
             background: linear-gradient(135deg, #06b6d4, #7c3aed);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -412,168 +29,93 @@
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .stats-card {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.1));
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 1rem;
-            margin-top: 1rem;
         }
 
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 1.5rem 1rem;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
+        .progress-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
             color: #06b6d4;
-            margin-bottom: 0.5rem;
         }
 
-        .stat-label {
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-
-        .courses-grid {
+        .course-progress {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: 1.5rem;
         }
 
-        .course-card {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        .progress-item {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
             padding: 1.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .course-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(5px);
-            border-color: rgba(6, 182, 212, 0.3);
-        }
-
-        .course-icon {
-            font-size: 2rem;
-            width: 60px;
-            height: 60px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            background: rgba(6, 182, 212, 0.1);
-            border-radius: 12px;
-            flex-shrink: 0;
-        }
-
-        .course-info {
-            flex: 1;
-        }
-
-        .course-info h4 {
-            margin-bottom: 0.5rem;
-            color: #f1f5f9;
-            font-size: 1.1rem;
-        }
-
-        .course-info p {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .course-meta {
-            display: flex;
+            justify-content: space-between;
             gap: 1rem;
-            font-size: 0.8rem;
-            color: #64748b;
         }
 
-        .quick-links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 0.8rem;
-            margin-top: 1rem;
-        }
-
-        .quick-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            text-decoration: none;
-            color: #cbd5e1;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .quick-link:hover {
-            background: rgba(6, 182, 212, 0.1);
-            color: #06b6d4;
-            transform: translateY(-2px);
-            border-color: rgba(6, 182, 212, 0.3);
-        }
-
-        .user-course-item {
-            padding: 1.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .course-title {
-            font-weight: 500;
-            margin-bottom: 1rem;
-            color: #f1f5f9;
+        .progress-bar-container {
+            flex-grow: 1;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
         }
 
         .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #334155;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress-fill {
             height: 100%;
-            background: linear-gradient(135deg, #06b6d4, #7c3aed);
-            border-radius: 4px;
-            transition: width 0.5s ease;
+            background: linear-gradient(90deg, #06b6d4, #7c3aed);
+            transition: width 0.5s ease-in-out;
         }
 
+        .progress-percent {
+            font-weight: bold;
+            color: #06b6d4;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .quick-links h3, .featured-course h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #06b6d4;
+        }
+
+        .quick-links ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quick-links li a {
+            display: block;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #f1f5f9;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .quick-links li a:hover {
+            background: rgba(30, 41, 59, 1);
+            transform: translateX(5px);
+        }
+        
         .progress-text {
             font-size: 0.8rem;
             color: #94a3b8;
@@ -623,13 +165,156 @@
             text-align: center;
             color: #94a3b8;
             padding: 2rem;
-            font-style: italic;
-        }
-
-        .no-courses {
-            text-align: center;
-            padding: 2rem;
         }
     </style>
+</head>
+<body>
+    <div class="loading-bar"></div>
+    
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">EduTech Dashboard</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
+                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div id="authMessage" class="auth-message error" style="display: none;">
+            <div class="message-content">
+                <i class="fas fa-lock"></i>
+                You must be logged in to view your Dashboard. <a href="login.html">Login here</a>.
+            </div>
+        </div>
+
+        <div id="dashboardContent" style="display: none;">
+            <div class="dashboard-header">
+                <h1>Welcome Back, <span id="dashboardUserName">User</span>!</h1>
+                <p>Your personalized learning and progress overview.</p>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="main-content">
+                    
+                    <section class="stats-section card">
+                        <h2>Your Performance</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="icon"><i class="fas fa-book-open"></i></div>
+                                <div class="value count" data-to="3">3</div>
+                                <div class="label">Courses Enrolled</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="icon"><i class="fas fa-check-circle"></i></div>
+                                <div class="value count" data-to="1">1</div>
+                                <div class="label">Courses Completed</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="icon"><i class="fas fa-star"></i></div>
+                                <div class="value count" data-to="4.9">4.9</div>
+                                <div class="label">Average Rating</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="icon"><i class="fas fa-certificate"></i></div>
+                                <div class="value count" data-to="2">2</div>
+                                <div class="label">Certificates Earned</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="progress-section card">
+                        <h2>Current Progress</h2>
+                        <div class="course-progress">
+                            
+                            <div class="progress-item">
+                                <div class="progress-info">
+                                    <h4>Full Stack Web Development</h4>
+                                    <p class="text-muted">Next up: Server-Side Rendering</p>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 75%;"></div>
+                                </div>
+                                <span class="progress-percent">75%</span>
+                                <a href="#" class="btn btn-small">Continue</a>
+                            </div>
+
+                            <div class="progress-item">
+                                <div class="progress-info">
+                                    <h4>Data Science & ML Bootcamp</h4>
+                                    <p class="text-muted">Next up: Model Deployment</p>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 30%;"></div>
+                                </div>
+                                <span class="progress-percent">30%</span>
+                                <a href="#" class="btn btn-small">Continue</a>
+                            </div>
+
+                        </div>
+                    </section>
+                </div>
+                
+                <div class="sidebar">
+                    
+                    <section class="quick-links card">
+                        <h3>Quick Actions</h3>
+                        <ul>
+                            <li><a href="courses.html"><i class="fas fa-graduation-cap"></i> Browse All Courses</a></li>
+                            <li><a href="profile.html"><i class="fas fa-user-circle"></i> Edit My Profile</a></li>
+                            <li><a href="gallery.html"><i class="fas fa-code"></i> Project Gallery</a></li>
+                            <li><a href="ads-manager.html"><i class="fas fa-bullhorn"></i> Ads Manager</a></li>
+                        </ul>
+                    </section>
+                    
+                    <section class="featured-course card">
+                        <h3>Recommended for You</h3>
+                        <h4>Advanced Cloud Computing</h4>
+                        <p class="text-muted">Master AWS, Azure, and Google Cloud deployment strategies.</p>
+                        <a href="courses.html" class="btn btn-primary">View Course</a>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 EduTech. All rights reserved.</p>
+    </footer>
+
+    <script src="assets/js/central-db.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication status
+            if (isLoggedIn()) {
+                const user = getCurrentUser();
+                document.getElementById('dashboardUserName').textContent = user.full_name.split(' ')[0];
+                document.getElementById('dashboardContent').style.display = 'grid';
+            } else {
+                document.getElementById('authMessage').style.display = 'block';
+            }
+        });
+
+        // Function to animate progress bars (optional, but good for UX)
+        function animateProgressBars() {
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                const percent = bar.style.width;
+                bar.style.width = '0%'; // Start at 0
+                setTimeout(() => {
+                    bar.style.width = percent; // Animate to target
+                }, 100);
+            });
+        }
+        
+        // Call animate on page load
+        document.addEventListener('DOMContentLoaded', animateProgressBars);
+    </script>
 </body>
 </html>

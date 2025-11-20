@@ -5,841 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="firebase-config.js"></script>
-</head>
-<body>
-    <div class="loading-bar"></div>
-    
-    <header class="header">
-        <nav class="nav">
-            <div class="logo">EduTech</div>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
-                <li><a href="login.html" id="loginLink">Login</a></li>
-                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
-                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main class="container">
-        <div id="authMessage" class="auth-message" style="display: none;">
-            <div class="message-content">
-                <h2>🔐 Please Login to View Profile</h2>
-                <p>You need to be logged in to view your profile information.</p>
-                <a href="login.html" class="btn btn-primary">Login Now</a>
-                <p class="text-muted mt-2">Don't have an account? <a href="login.html" style="color: #06b6d4;">Register here</a></p>
-            </div>
-        </div>
-
-        <div id="profileContent" style="display: none;">
-            <div class="profile-header">
-                <h1>👤 My Profile</h1>
-                <p>Manage your account information and track your learning journey</p>
-            </div>
-
-            <div class="profile-grid">
-                <div class="main-content">
-                    <div class="card">
-                        <h3>📋 Personal Information</h3>
-                        <div class="profile-info">
-                            <div class="info-item">
-                                <label>Full Name:</label>
-                                <span id="profileName">Loading...</span>
-                            </div>
-                            <div class="info-item">
-                                <label>Email:</label>
-                                <span id="profileEmail">Loading...</span>
-                            </div>
-                            <div class="info-item">
-                                <label>Role:</label>
-                                <span id="profileRole">Loading...</span>
-                            </div>
-                            <div class="info-item">
-                                <label>Member Since:</label>
-                                <span id="profileJoinDate">Loading...</span>
-                            </div>
-                            <div class="info-item">
-                                <label>User ID:</label>
-                                <span id="profileUserId">Loading...</span>
-                            </div>
-                        </div>
-                        <div class="action-buttons" style="margin-top: 1rem;">
-                            <button class="btn btn-secondary" onclick="showEditNameModal()">Change Name</button>
-                            <button class="btn btn-secondary" onclick="showChangePasswordModal()">Change Password</button>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>📊 Learning Statistics</h3>
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <div class="stat-number" id="profileEnrolledCount">0</div>
-                                <div class="stat-label">Courses Enrolled</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="profileProgressAvg">0%</div>
-                                <div class="stat-label">Average Progress</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="profileCompletedCount">0</div>
-                                <div class="stat-label">Courses Completed</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="profileLearningHours">0</div>
-                                <div class="stat-label">Learning Hours</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sidebar">
-                    <div class="card">
-                        <h3>🎓 Recent Courses</h3>
-                        <div id="profileCourses">
-                            <div class="loading-courses">Loading your courses...</div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>⚡ Quick Actions</h3>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary" onclick="goToDashboard()">Back to Dashboard</button>
-                            <button class="btn btn-secondary" onclick="browseCourses()">Browse Courses</button>
-                            <button class="btn btn-secondary" onclick="contactSupport()">Contact Support</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Edit Name Modal -->
-    <div id="editNameModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>✏️ Change Your Name</h3>
-                <span class="close" onclick="closeEditNameModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="editNameForm">
-                    <div class="form-group">
-                        <label for="newName">New Full Name:</label>
-                        <input type="text" id="newName" required placeholder="Enter your full name">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeEditNameModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Update Name</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Change Password Modal -->
-    <div id="changePasswordModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>🔒 Change Password</h3>
-                <span class="close" onclick="closeChangePasswordModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="changePasswordForm">
-                    <div class="form-group">
-                        <label for="currentPassword">Current Password:</label>
-                        <input type="password" id="currentPassword" required placeholder="Enter current password">
-                    </div>
-                    <div class="form-group">
-                        <label for="newPassword">New Password:</label>
-                        <input type="password" id="newPassword" required placeholder="Enter new password" minlength="6">
-                        <small class="form-help">Password must be at least 6 characters long</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm New Password:</label>
-                        <input type="password" id="confirmPassword" required placeholder="Confirm new password">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Change Password</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Success Message -->
-    <div id="successMessage" class="success-message" style="display: none;">
-        <div class="message-content">
-            <span class="success-icon">✅</span>
-            <span id="successText">Operation completed successfully!</span>
-            <button class="close-btn" onclick="hideSuccessMessage()">×</button>
-        </div>
-    </div>
-
-    <footer class="footer">
-        <p>&copy; 2024 EduTech. All rights reserved.</p>
-    </footer>
-
-    <script src="assets/js/central-db.js"></script>
-    <script src="assets/js/auth.js"></script>
-    <script>
-        // Smart Profile Management System
-        class ProfileManager {
-            constructor() {
-                this.refreshDelay = 2000;
-            }
-            
-            // Update single UI element
-            updateUIElement(elementId, value) {
-                const element = document.getElementById(elementId);
-                if (element) {
-                    element.textContent = value;
-                }
-            }
-            
-            // Refresh all profile data from database
-            async refreshProfileData() {
-                try {
-                    const currentUser = getCurrentUser();
-                    if (!currentUser) return false;
-                    
-                    console.log('🔄 Refreshing profile data...');
-                    
-                    // Get fresh data from database
-                    const freshData = await clientDB.getUserById(currentUser.id);
-                    if (!freshData) {
-                        console.error('User data not found');
-                        return false;
-                    }
-                    
-                    // Update current user object
-                    Object.assign(currentUser, freshData);
-                    
-                    // Update localStorage
-                    localStorage.setItem('user_name', freshData.full_name);
-                    localStorage.setItem('user_email', freshData.email);
-                    localStorage.setItem('user_role', freshData.role);
-                    
-                    // Update all UI elements
-                    this.updateUIElement('profileName', freshData.full_name || 'Not set');
-                    this.updateUIElement('profileEmail', freshData.email);
-                    this.updateUIElement('profileRole', freshData.role);
-                    this.updateUIElement('profileJoinDate', new Date(freshData.created_at).toLocaleDateString());
-                    this.updateUIElement('profileUserId', freshData.id);
-                    
-                    // Update navigation
-                    updateNavigation();
-                    
-                    // Refresh statistics and courses
-                    await updateProfileStats();
-                    await loadProfileCourses();
-                    
-                    console.log('✅ Profile data refreshed successfully');
-                    return true;
-                    
-                } catch (error) {
-                    console.error('❌ Error refreshing profile data:', error);
-                    return false;
-                }
-            }
-            
-            // Show success message with smart refresh
-            showSmartSuccess(message) {
-                const successElement = document.getElementById('successMessage');
-                const successText = document.getElementById('successText');
-                
-                // Show initial message
-                successText.textContent = message;
-                successElement.style.display = 'block';
-                
-                // Start refresh process after delay
-                setTimeout(async () => {
-                    const refreshSuccess = await this.refreshProfileData();
-                    
-                    if (refreshSuccess) {
-                        successText.textContent = '✅ ' + message + ' - All data updated!';
-                    } else {
-                        successText.textContent = '⚠️ ' + message + ' - Some data may need manual refresh';
-                    }
-                    
-                    // Hide message after additional delay
-                    setTimeout(() => {
-                        successElement.style.display = 'none';
-                    }, 3000);
-                    
-                }, this.refreshDelay);
-            }
-        }
-
-        // Initialize profile manager
-        const profileManager = new ProfileManager();
-
-        // Load profile information
-        async function loadProfileInfo() {
-            const currentUser = getCurrentUser();
-            if (!currentUser) return;
-
-            try {
-                console.log('👤 Loading profile for user:', currentUser.id);
-                
-                // Update personal information
-                document.getElementById('profileName').textContent = currentUser.full_name || 'Not set';
-                document.getElementById('profileEmail').textContent = currentUser.email;
-                document.getElementById('profileRole').textContent = currentUser.role;
-                document.getElementById('profileJoinDate').textContent = new Date(currentUser.created_at).toLocaleDateString();
-                document.getElementById('profileUserId').textContent = currentUser.id;
-                
-                console.log('✅ Profile info loaded successfully');
-            } catch (error) {
-                console.error('❌ Error loading profile info:', error);
-            }
-        }
-
-        // Update profile statistics
-        async function updateProfileStats() {
-            const currentUser = getCurrentUser();
-            if (!currentUser) return;
-
-            try {
-                const userCourses = await clientDB.getUserEnrolledCourses(currentUser.id);
-                const enrolledCount = userCourses.length;
-                const completedCount = userCourses.filter(course => course.progress_percentage === 100).length;
-                const progressAvg = userCourses.length > 0 
-                    ? Math.round(userCourses.reduce((sum, course) => sum + course.progress_percentage, 0) / userCourses.length)
-                    : 0;
-                
-                // Calculate total learning hours (estimate based on course duration and progress)
-                let learningHours = 0;
-                userCourses.forEach(course => {
-                    const courseHours = course.duration_hours || 0;
-                    const progress = course.progress_percentage || 0;
-                    learningHours += (courseHours * progress) / 100;
-                });
-                learningHours = Math.round(learningHours);
-
-                document.getElementById('profileEnrolledCount').textContent = enrolledCount;
-                document.getElementById('profileCompletedCount').textContent = completedCount;
-                document.getElementById('profileProgressAvg').textContent = progressAvg + '%';
-                document.getElementById('profileLearningHours').textContent = learningHours;
-                
-                console.log('Profile stats updated:', { enrolledCount, completedCount, progressAvg, learningHours });
-            } catch (error) {
-                console.error('Error updating profile stats:', error);
-                // Set default values if error
-                document.getElementById('profileEnrolledCount').textContent = '0';
-                document.getElementById('profileCompletedCount').textContent = '0';
-                document.getElementById('profileProgressAvg').textContent = '0%';
-                document.getElementById('profileLearningHours').textContent = '0';
-            }
-        }
-
-        // Load user's courses for profile
-        async function loadProfileCourses() {
-            const currentUser = getCurrentUser();
-            if (!currentUser) return;
-
-            const profileCoursesContainer = document.getElementById('profileCourses');
-            
-            try {
-                const userCourses = await clientDB.getUserEnrolledCourses(currentUser.id);
-                
-                if (userCourses.length === 0) {
-                    profileCoursesContainer.innerHTML = `
-                        <div class="no-courses">
-                            <p style="text-align: center; color: #94a3b8;">No courses enrolled yet.</p>
-                            <button class="btn btn-small" onclick="browseCourses()" style="margin-top: 1rem; width: 100%;">Browse Courses</button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Show only recent courses (max 5)
-                const recentCourses = userCourses.slice(0, 5);
-                
-                profileCoursesContainer.innerHTML = recentCourses.map(course => `
-                    <div class="profile-course-item">
-                        <div class="course-title">${course.title}</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${course.progress_percentage}%"></div>
-                        </div>
-                        <div class="progress-text">${course.progress_percentage}% Complete</div>
-                    </div>
-                `).join('');
-                
-                // Show "View All" button if there are more courses
-                if (userCourses.length > 5) {
-                    profileCoursesContainer.innerHTML += `
-                        <button class="btn btn-small" onclick="goToDashboard()" style="width: 100%; margin-top: 1rem;">View All Courses</button>
-                    `;
-                }
-            } catch (error) {
-                console.error('Error loading profile courses:', error);
-                profileCoursesContainer.innerHTML = '<p style="text-align: center; color: #ef4444;">Error loading your courses.</p>';
-            }
-        }
-
-        // Show edit name modal
-        function showEditNameModal() {
-            const currentUser = getCurrentUser();
-            document.getElementById('newName').value = currentUser.full_name || '';
-            document.getElementById('editNameModal').style.display = 'block';
-        }
-
-        // Close edit name modal
-        function closeEditNameModal() {
-            document.getElementById('editNameModal').style.display = 'none';
-            document.getElementById('editNameForm').reset();
-        }
-
-        // Show change password modal
-        function showChangePasswordModal() {
-            document.getElementById('changePasswordModal').style.display = 'block';
-        }
-
-        // Close change password modal
-        function closeChangePasswordModal() {
-            document.getElementById('changePasswordModal').style.display = 'none';
-            document.getElementById('changePasswordForm').reset();
-        }
-
-        // Show success message
-        function showSuccessMessage(message) {
-            document.getElementById('successText').textContent = message;
-            document.getElementById('successMessage').style.display = 'block';
-            
-            // Auto hide after 5 seconds
-            setTimeout(hideSuccessMessage, 5000);
-        }
-
-        // Hide success message
-        function hideSuccessMessage() {
-            document.getElementById('successMessage').style.display = 'none';
-        }
-
-        // Go back to dashboard
-        function goToDashboard() {
-            window.location.href = 'dashboard.html';
-        }
-
-        // Browse courses
-        function browseCourses() {
-            window.location.href = 'courses.html';
-        }
-
-        // Contact support
-        function contactSupport() {
-            window.location.href = 'contact.html';
-        }
-
-        // Initialize profile page
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('👤 Profile page loading...');
-            
-            // Update navigation first
-            updateNavigation();
-            
-            // Check if user is logged in
-            if (!isLoggedIn()) {
-                console.log('❌ User not logged in, showing auth message');
-                document.getElementById('authMessage').style.display = 'block';
-                document.getElementById('profileContent').style.display = 'none';
-                return;
-            }
-
-            console.log('✅ User is logged in, loading profile content');
-            
-            // User is logged in, show profile content
-            document.getElementById('authMessage').style.display = 'none';
-            document.getElementById('profileContent').style.display = 'block';
-            
-            // Load profile content
-            try {
-                console.log('📊 Loading profile components...');
-                await loadProfileInfo();
-                await loadProfileCourses();
-                await updateProfileStats();
-                console.log('✅ Profile page loaded successfully');
-            } catch (error) {
-                console.error('❌ Profile page initialization error:', error);
-                alert('Error loading profile. Please refresh the page.');
-            }
-
-            // Edit Name Form Handler - SMART REFRESH VERSION
-            document.getElementById('editNameForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const nameInput = document.getElementById('newName');
-                const newName = nameInput.value.trim();
-                
-                if (!newName) {
-                    alert('Please enter a valid name');
-                    return;
-                }
-
-                try {
-                    const currentUser = getCurrentUser();
-                    const success = await clientDB.updateUser(currentUser.id, {
-                        full_name: newName,
-                        updated_at: new Date().toISOString()
-                    });
-                    
-                    if (success) {
-                        // Immediate UI update for better UX
-                        localStorage.setItem('user_name', newName);
-                        currentUser.full_name = newName;
-                        document.getElementById('profileName').textContent = newName;
-                        updateNavigation();
-                        
-                        closeEditNameModal();
-                        profileManager.showSmartSuccess('Name updated successfully');
-                    } else {
-                        alert('❌ Failed to update name');
-                    }
-                } catch (error) {
-                    console.error('Error updating name:', error);
-                    alert('❌ Error updating name');
-                }
-            });
-
-            // Change Password Form Handler - SMART REFRESH VERSION
-            document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const currentPassword = document.getElementById('currentPassword').value;
-                const newPassword = document.getElementById('newPassword').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-
-                // Validation
-                if (newPassword.length < 6) {
-                    alert('❌ Password must be at least 6 characters long');
-                    return;
-                }
-
-                if (newPassword !== confirmPassword) {
-                    alert('❌ New passwords do not match');
-                    return;
-                }
-
-                if (currentPassword === newPassword) {
-                    alert('❌ New password must be different from current password');
-                    return;
-                }
-
-                try {
-                    // Verify current password
-                    const isValid = await clientDB.verifyUser(getCurrentUser().email, currentPassword);
-                    if (!isValid) {
-                        alert('❌ Current password is incorrect!');
-                        return;
-                    }
-
-                    // Update password
-                    const success = await clientDB.updateUser(getCurrentUser().id, {
-                        password: newPassword,
-                        updated_at: new Date().toISOString()
-                    });
-                    
-                    if (success) {
-                        closeChangePasswordModal();
-                        profileManager.showSmartSuccess('Password changed successfully');
-                    } else {
-                        alert('❌ Failed to change password');
-                    }
-                } catch (error) {
-                    console.error('Error changing password:', error);
-                    alert('❌ Error changing password');
-                }
-            });
-
-            // Close modals when clicking outside
-            window.addEventListener('click', function(event) {
-                const editNameModal = document.getElementById('editNameModal');
-                const changePasswordModal = document.getElementById('changePasswordModal');
-                
-                if (event.target === editNameModal) {
-                    closeEditNameModal();
-                }
-                if (event.target === changePasswordModal) {
-                    closeChangePasswordModal();
-                }
-            });
-        });
-    </script>
-
     <style>
-        .auth-message {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 60vh;
-            text-align: center;
-        }
-
-        .message-content {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 3rem;
-            border-radius: 16px;
-            border: 1px solid rgba(6, 182, 212, 0.3);
-            max-width: 500px;
-        }
-
-        .message-content h2 {
-            color: #06b6d4;
-            margin-bottom: 1rem;
-        }
-
+        /* Specific Styles for Profile Page */
         .profile-header {
             text-align: center;
             margin-bottom: 3rem;
-            padding: 2rem 0;
         }
 
-        .profile-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #06b6d4, #7c3aed);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .profile-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .profile-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .profile-info {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.8rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .info-item label {
-            font-weight: 500;
-            color: #cbd5e1;
-        }
-
-        .info-item span {
-            color: #f1f5f9;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 1.5rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #06b6d4;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-
-        .profile-course-item {
-            padding: 1.2rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .course-title {
-            font-weight: 500;
-            margin-bottom: 0.8rem;
-            color: #f1f5f9;
-            font-size: 0.9rem;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #334155;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #06b6d4, #7c3aed);
-            border-radius: 3px;
-            transition: width 0.5s ease;
-        }
-
-        .progress-text {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            text-align: center;
-        }
-
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #06b6d4, #7c3aed);
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(6, 182, 212, 0.3);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #06b6d4, #7c3aed);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #475569, #64748b);
-        }
-
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 0.8rem;
-        }
-
-        .loading-courses {
-            text-align: center;
-            color: #94a3b8;
-            padding: 2rem;
-            font-style: italic;
-        }
-
-        .no-courses {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            font-size: 3rem;
             display: flex;
+            align-items: center;
             justify-content: center;
-            align-items: center;
+            margin: 0 auto 1rem;
+            box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.1);
         }
 
-        .modal-content {
-            background: #1e293b;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 500px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        .profile-form {
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            color: #f1f5f9;
-        }
-
-        .close {
-            color: #94a3b8;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .close:hover {
-            color: #f1f5f9;
-        }
-
-        .modal-body {
-            padding: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #cbd5e1;
-            font-weight: 500;
-        }
-
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 12px 16px;
+            padding: 0.8rem 1rem;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            color: #f1f5f9;
+            color: var(--text);
             font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #06b6d4;
-            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+            transition: border-color 0.3s;
         }
 
         .form-help {
@@ -893,15 +97,173 @@
         }
 
         @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
         }
     </style>
+</head>
+<body>
+    <div class="loading-bar"></div>
+    
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">EduTech</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
+                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div id="authMessage" class="auth-message error" style="display: none;">
+            <div class="message-content">
+                <i class="fas fa-lock"></i>
+                You must be logged in to view your profile. <a href="login.html">Login here</a>.
+            </div>
+        </div>
+
+        <div id="profileContent" style="display: none;">
+            <div class="profile-header">
+                <div class="profile-avatar"><i class="fas fa-user"></i></div>
+                <h1>My Profile Settings</h1>
+                <p class="text-muted">Manage your personal information and preferences.</p>
+            </div>
+
+            <div class="card profile-form">
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" required readonly>
+                        <span class="form-help">Email cannot be changed.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">User Role</label>
+                        <input type="text" id="role" readonly>
+                        <span class="form-help">Your current access level.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bio">Bio / Headline</label>
+                        <input type="text" id="bio" placeholder="e.g., Aspiring Web Developer">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select id="country">
+                            <option value="">Select Country</option>
+                            <option value="LK">Sri Lanka</option>
+                            <option value="IN">India</option>
+                            <option value="US">United States</option>
+                            <option value="GB">United Kingdom</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="loadProfile()">Reset</button>
+                        <button type="submit" class="btn btn-primary" id="saveProfileBtn">Save Changes</button>
+                    </div>
+                </form>
+
+                <div class="mt-3 text-center">
+                    <button class="btn logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="successMessage" class="success-message" style="display: none;">
+        <div class="message-content">
+            <span class="success-icon"><i class="fas fa-check-circle"></i></span>
+            Profile updated successfully!
+            <button class="close-btn" onclick="document.getElementById('successMessage').style.display='none';">&times;</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 EduTech. All rights reserved.</p>
+    </footer>
+
+    <script src="assets/js/central-db.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        // Load user data into form fields
+        function loadProfile() {
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('fullName').value = user.full_name || '';
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('role').value = user.role.toUpperCase() || 'USER';
+                document.getElementById('bio').value = localStorage.getItem('user_bio') || '';
+                document.getElementById('country').value = localStorage.getItem('user_country') || '';
+            }
+        }
+
+        // Handle form submission
+        async function saveProfile(event) {
+            event.preventDefault();
+            const submitBtn = document.getElementById('saveProfileBtn');
+            const originalText = submitBtn.innerText;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Saving...';
+
+            const user = getCurrentUser();
+            const fullName = document.getElementById('fullName').value;
+            const bio = document.getElementById('bio').value;
+            const country = document.getElementById('country').value;
+            
+            const userDataToUpdate = {
+                full_name: fullName,
+                bio: bio, // Stored in localStorage for demo
+                country: country // Stored in localStorage for demo
+            };
+
+            // In a real app, use clientDB.updateUserDetails(user.id, { full_name: fullName })
+            // For this demo, update localStorage and show success.
+            localStorage.setItem('user_name', fullName);
+            localStorage.setItem('user_bio', bio);
+            localStorage.setItem('user_country', country);
+            
+            // Re-update the global currentUser and navigation
+            isLoggedIn(); 
+            updateNavigation();
+
+            // Mock saving to Firebase (clientDB is available)
+            const dbUpdateSuccess = await clientDB.updateUserDetails(user.id, { full_name: fullName });
+
+            // Show success message
+            document.getElementById('successMessage').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 3000);
+
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+            
+            // Check authentication status
+            if (isLoggedIn()) {
+                document.getElementById('profileContent').style.display = 'block';
+                loadProfile();
+                document.getElementById('profileForm').addEventListener('submit', saveProfile);
+            } else {
+                document.getElementById('authMessage').style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>

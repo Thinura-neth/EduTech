@@ -6,12 +6,12 @@
     <title>Gallery - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/gallery.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase ස්ක්‍රිප්ට් නිවැරදි අනුක්‍රමයෙන් -->
-    <script src="assets/js/firebase-config.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="firebase-config.js"></script>
 </head>
 <body>
     <div class="loading-bar"></div>
@@ -22,6 +22,7 @@
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
                 <li><a href="login.html" id="loginLink">Login</a></li>
                 <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
                 <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
@@ -31,97 +32,56 @@
 
     <main class="container">
         <div class="page-header">
-            <h1>EduTech Gallery</h1>
-            <p>Explore our student projects, campus life, and learning journey</p>
+            <h1>Student Project Gallery</h1>
+            <p>Showcasing the best work from our graduates and current students.</p>
         </div>
 
         <div class="gallery-controls">
             <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">All Projects</button>
-                <button class="filter-btn" data-filter="web">Web Development</button>
-                <button class="filter-btn" data-filter="mobile">Mobile Apps</button>
-                <button class="filter-btn" data-filter="design">UI/UX Design</button>
-                <button class="filter-btn" data-filter="data">Data Science</button>
+                <button class="filter-btn active" data-category="all">All Projects</button>
+                <button class="filter-btn" data-category="web">Web Dev 🌐</button>
+                <button class="filter-btn" data-category="mobile">Mobile App 📱</button>
+                <button class="filter-btn" data-category="data">Data Science 📊</button>
+                <button class="filter-btn" data-category="design">Design 🎨</button>
             </div>
-            
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search projects...">
-                <span class="search-icon">🔍</span>
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="projectSearch" placeholder="Search projects...">
             </div>
         </div>
-
-        <div class="gallery-grid" id="galleryGrid">
-            <!-- Projects will be loaded dynamically -->
+        
+        <div class="text-center mb-3">
+            <button class="btn btn-primary" onclick="openProjectForm()"><i class="fas fa-plus"></i> Submit Your Project</button>
         </div>
 
-        <div class="gallery-stats">
-            <div class="stats-card">
-                <h3>🎓 Student Projects Showcase</h3>
-                <div class="stats-grid">
-                    <div class="stat">
-                        <div class="stat-number">150+</div>
-                        <div class="stat-label">Total Projects</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">2,500+</div>
-                        <div class="stat-label">Active Students</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">94%</div>
-                        <div class="stat-label">Success Rate</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="submit-project">
-            <div class="card">
-                <h2>🎨 Share Your Project</h2>
-                <p>Have you built something amazing? Share it with the EduTech community!</p>
-                <button class="btn btn-primary" onclick="showProjectForm()">Submit Your Project</button>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+        <div class="gallery-grid" id="projectsContainer">
+            <p class="text-center text-muted">Loading projects...</p>
         </div>
     </main>
 
-    <!-- Project Modal -->
     <div id="projectModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div id="modalContent">
-                <!-- Dynamic content will be loaded here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Project Submission Form Modal -->
-    <div id="projectFormModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeProjectForm()">&times;</span>
-            <h2>Submit Your Project</h2>
-            <form id="projectForm" class="project-form">
+            <h2>Submit Your Portfolio Project</h2>
+            <button class="close-btn" onclick="closeProjectForm()">&times;</button>
+            <form id="projectSubmissionForm">
                 <div class="form-group">
                     <label for="projectTitle">Project Title</label>
-                    <input type="text" id="projectTitle" required>
+                    <input type="text" id="projectTitle" placeholder="My Awesome Project" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="projectCategory">Category</label>
                     <select id="projectCategory" required>
-                        <option value="">Select Category</option>
                         <option value="web">Web Development</option>
-                        <option value="mobile">Mobile Apps</option>
-                        <option value="design">UI/UX Design</option>
+                        <option value="mobile">Mobile App</option>
                         <option value="data">Data Science</option>
+                        <option value="design">Design / UI/UX</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="projectDescription">Description</label>
-                    <textarea id="projectDescription" rows="4" required></textarea>
+                    <textarea id="projectDescription" placeholder="A brief description of your project and its purpose." required></textarea>
                 </div>
                 
                 <div class="form-group">
@@ -136,12 +96,12 @@
                 
                 <div class="form-group">
                     <label for="projectDemo">Demo URL</label>
-                    <input type="url" id="projectDemo">
+                    <input type="url" id="projectDemo" placeholder="https://example.com/demo">
                 </div>
                 
                 <div class="form-group">
                     <label for="projectGithub">GitHub URL</label>
-                    <input type="url" id="projectGithub">
+                    <input type="url" id="projectGithub" placeholder="https://github.com/user/repo">
                 </div>
                 
                 <div class="form-actions">
@@ -156,7 +116,7 @@
         <p>&copy; 2024 EduTech. All rights reserved.</p>
     </footer>
 
-    <!-- ස්ක්‍රිප්ට් එක් වරක් පමණක් ලබා දීම -->
+    <script src="assets/js/central-db.js"></script>
     <script src="assets/js/auth.js"></script>
     <script src="assets/js/gallery.js"></script>
 </body>

@@ -5,805 +5,205 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing Plans - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="firebase-config.js"></script>
-</head>
-<body>
-    <div class="loading-bar"></div>
-    
-    <header class="header">
-        <nav class="nav">
-            <div class="logo">EduTech Pricing</div>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="login.html" id="loginLink">Login</a></li>
-                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
-                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main class="container">
-        <div class="page-header">
-            <h1>Choose Your Learning Plan</h1>
-            <p>Select the perfect plan that matches your learning goals and budget</p>
-        </div>
-
-        <!-- Billing Toggle -->
-        <div class="billing-toggle-container">
-            <div class="billing-toggle">
-                <span class="billing-option active" data-plan="monthly">Monthly Billing</span>
-                <div class="toggle-switch">
-                    <input type="checkbox" id="billingToggle" class="toggle-input">
-                    <label for="billingToggle" class="toggle-label">
-                        <span class="toggle-handle"></span>
-                    </label>
-                </div>
-                <span class="billing-option" data-plan="yearly">Yearly Billing</span>
-                <div class="save-badge" id="saveBadge">
-                    Save 20%
-                </div>
-            </div>
-        </div>
-
-        <!-- Pricing Cards -->
-        <div class="pricing-grid">
-            <!-- Free Plan -->
-            <div class="pricing-card">
-                <div class="plan-header">
-                    <div class="plan-icon">🎓</div>
-                    <h3>Starter</h3>
-                    <div class="price" data-monthly="0" data-yearly="0">
-                        <span class="currency">$</span>
-                        <span class="amount">0</span>
-                        <span class="period">/month</span>
-                    </div>
-                    <p class="plan-description">Perfect for beginners starting their coding journey</p>
-                </div>
-                
-                <div class="plan-features">
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Access to 5 basic courses</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Community support</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Basic coding exercises</span>
-                    </div>
-                    <div class="feature-item disabled">
-                        <span class="feature-icon">✗</span>
-                        <span>Certificate of completion</span>
-                    </div>
-                    <div class="feature-item disabled">
-                        <span class="feature-icon">✗</span>
-                        <span>Project reviews</span>
-                    </div>
-                    <div class="feature-item disabled">
-                        <span class="feature-icon">✗</span>
-                        <span>1-on-1 mentoring</span>
-                    </div>
-                </div>
-                
-                <button class="btn btn-outline plan-btn" onclick="selectPlan('starter')">
-                    Get Started Free
-                </button>
-            </div>
-
-            <!-- Pro Plan - Featured -->
-            <div class="pricing-card featured">
-                <div class="popular-badge">Most Popular</div>
-                <div class="plan-header">
-                    <div class="plan-icon">🚀</div>
-                    <h3>Pro Learner</h3>
-                    <div class="price" data-monthly="29" data-yearly="24">
-                        <span class="currency">$</span>
-                        <span class="amount">29</span>
-                        <span class="period">/month</span>
-                    </div>
-                    <p class="plan-description">Ideal for serious learners building career skills</p>
-                </div>
-                
-                <div class="plan-features">
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Unlimited course access</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Priority support</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Advanced projects</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Certificates of completion</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Monthly project reviews</span>
-                    </div>
-                    <div class="feature-item disabled">
-                        <span class="feature-icon">✗</span>
-                        <span>1-on-1 mentoring</span>
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary plan-btn" onclick="selectPlan('pro')">
-                    Start Learning
-                </button>
-            </div>
-
-            <!-- Elite Plan -->
-            <div class="pricing-card">
-                <div class="plan-header">
-                    <div class="plan-icon">⭐</div>
-                    <h3>Elite</h3>
-                    <div class="price" data-monthly="79" data-yearly="63">
-                        <span class="currency">$</span>
-                        <span class="amount">79</span>
-                        <span class="period">/month</span>
-                    </div>
-                    <p class="plan-description">For professionals seeking mastery and career growth</p>
-                </div>
-                
-                <div class="plan-features">
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Everything in Pro</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Weekly 1-on-1 mentoring</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Career coaching sessions</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Portfolio reviews</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Job interview preparation</span>
-                    </div>
-                    <div class="feature-item">
-                        <span class="feature-icon">✓</span>
-                        <span>Exclusive community access</span>
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary plan-btn" onclick="selectPlan('elite')">
-                    Go Elite
-                </button>
-            </div>
-        </div>
-
-        <!-- Comparison Table -->
-        <div class="comparison-section">
-            <div class="card">
-                <h2>Detailed Plan Comparison</h2>
-                <div class="comparison-table">
-                    <div class="comparison-header">
-                        <div class="feature-column">Features</div>
-                        <div class="plan-column">Starter</div>
-                        <div class="plan-column featured">Pro Learner</div>
-                        <div class="plan-column">Elite</div>
-                    </div>
-                    
-                    <div class="comparison-row">
-                        <div class="feature-column">Number of Courses</div>
-                        <div class="plan-column">5</div>
-                        <div class="plan-column featured">Unlimited</div>
-                        <div class="plan-column">Unlimited</div>
-                    </div>
-                    
-                    <div class="comparison-row">
-                        <div class="feature-column">Certificate of Completion</div>
-                        <div class="plan-column">✗</div>
-                        <div class="plan-column featured">✓</div>
-                        <div class="plan-column">✓</div>
-                    </div>
-                    
-                    <div class="comparison-row">
-                        <div class="feature-column">Project Reviews</div>
-                        <div class="plan-column">✗</div>
-                        <div class="plan-column featured">Monthly</div>
-                        <div class="plan-column">Weekly</div>
-                    </div>
-                    
-                    <div class="comparison-row">
-                        <div class="feature-column">1-on-1 Mentoring</div>
-                        <div class="plan-column">✗</div>
-                        <div class="plan-column featured">✗</div>
-                        <div class="plan-column">Weekly</div>
-                    </div>
-                    
-                    <div class="comparison-row">
-                        <div class="feature-column">Career Support</div>
-                        <div class="plan-column">✗</div>
-                        <div class="plan-column featured">✗</div>
-                        <div class="plan-column">✓</div>
-                    </div>
-                    
-                    <div class="comparison-row">
-                        <div class="feature-column">Priority Support</div>
-                        <div class="plan-column">✗</div>
-                        <div class="plan-column featured">✓</div>
-                        <div class="plan-column">✓</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- FAQ Section -->
-        <div class="faq-section">
-            <div class="card">
-                <h2>Frequently Asked Questions</h2>
-                <div class="faq-grid">
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h4>Can I switch plans later?</h4>
-                            <span class="faq-toggle">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Yes! You can upgrade or downgrade your plan at any time. When upgrading, you'll get immediate access to new features. When downgrading, the changes take effect at the end of your billing cycle.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h4>Is there a free trial?</h4>
-                            <span class="faq-toggle">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>All paid plans come with a 7-day free trial. You can explore all features risk-free. No credit card required for the Starter plan.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h4>What payment methods do you accept?</h4>
-                            <span class="faq-toggle">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers for annual plans.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h4>Can I get a refund?</h4>
-                            <span class="faq-toggle">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>We offer a 30-day money-back guarantee for all annual plans. If you're not satisfied, contact our support team for a full refund.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h4>Do you offer student discounts?</h4>
-                            <span class="faq-toggle">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Yes! Students can get 50% off any plan. Contact our support team with your student ID to get the discount applied.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h4>Are there team plans available?</h4>
-                            <span class="faq-toggle">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Absolutely! We offer custom team plans with additional features like progress tracking, team analytics, and dedicated account management. Contact sales for pricing.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- CTA Section -->
-        <div class="pricing-cta">
-            <div class="cta-card">
-                <div class="cta-content">
-                    <h2>Ready to Start Your Learning Journey?</h2>
-                    <p>Join thousands of students who have transformed their careers with EduTech</p>
-                    <div class="cta-stats">
-                        <div class="stat">
-                            <div class="stat-number">10,000+</div>
-                            <div class="stat-label">Happy Students</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number">94%</div>
-                            <div class="stat-label">Success Rate</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number">24/7</div>
-                            <div class="stat-label">Support</div>
-                        </div>
-                    </div>
-                    <div class="cta-buttons">
-                        <button class="btn btn-primary btn-large" onclick="selectPlan('pro')">
-                            Start 7-Day Free Trial
-                        </button>
-                        <a href="contact.html" class="btn btn-secondary">
-                            Contact Sales
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 2rem;">
-            <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
-        </div>
-    </main>
-
-    <footer class="footer">
-        <p>&copy; 2024 EduTech. All rights reserved.</p>
-    </footer>
-
-    <script src="assets/js/auth.js"></script>
-    <script>
-        function selectPlan(plan) {
-            const planNames = {
-                'starter': 'Starter',
-                'pro': 'Pro Learner', 
-                'elite': 'Elite'
-            };
-            
-            const billing = document.getElementById('billingToggle').checked ? 'yearly' : 'monthly';
-            const planName = planNames[plan];
-            
-            alert(`Thank you for selecting the ${planName} plan with ${billing} billing! You will be redirected to the checkout page.`);
-            
-            // In a real application, you would redirect to payment processing
-            // window.location.href = `checkout.html?plan=${plan}&billing=${billing}`;
-        }
-
-        function updatePrices() {
-            const isYearly = document.getElementById('billingToggle').checked;
-            const prices = document.querySelectorAll('.price');
-            
-            prices.forEach(priceEl => {
-                const monthlyPrice = priceEl.getAttribute('data-monthly');
-                const yearlyPrice = priceEl.getAttribute('data-yearly');
-                const amountEl = priceEl.querySelector('.amount');
-                const periodEl = priceEl.querySelector('.period');
-                
-                if (isYearly) {
-                    amountEl.textContent = yearlyPrice;
-                    periodEl.textContent = '/month';
-                    // Add yearly savings note
-                    if (monthlyPrice !== '0') {
-                        const yearlyTotal = parseInt(yearlyPrice) * 12;
-                        const monthlyTotal = parseInt(monthlyPrice) * 12;
-                        const savings = monthlyTotal - yearlyTotal;
-                        if (!priceEl.querySelector('.yearly-note')) {
-                            const note = document.createElement('div');
-                            note.className = 'yearly-note';
-                            note.textContent = `Billed annually (save $${savings})`;
-                            note.style.cssText = 'font-size: 0.8rem; color: #06b6d4; margin-top: 0.5rem;';
-                            priceEl.appendChild(note);
-                        }
-                    }
-                } else {
-                    amountEl.textContent = monthlyPrice;
-                    periodEl.textContent = '/month';
-                    // Remove yearly note if exists
-                    const yearlyNote = priceEl.querySelector('.yearly-note');
-                    if (yearlyNote) {
-                        yearlyNote.remove();
-                    }
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            updateNavigation();
-
-            // Initialize billing toggle
-            const billingToggle = document.getElementById('billingToggle');
-            const saveBadge = document.getElementById('saveBadge');
-            
-            billingToggle.addEventListener('change', function() {
-                updatePrices();
-                
-                // Animate save badge
-                if (this.checked) {
-                    saveBadge.style.transform = 'scale(1.1)';
-                    setTimeout(() => {
-                        saveBadge.style.transform = 'scale(1)';
-                    }, 300);
-                }
-            });
-
-            // Update billing option text colors
-            document.querySelectorAll('.billing-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    document.querySelectorAll('.billing-option').forEach(opt => {
-                        opt.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    
-                    // Update toggle state
-                    const isYearly = this.getAttribute('data-plan') === 'yearly';
-                    billingToggle.checked = isYearly;
-                    updatePrices();
-                });
-            });
-
-            // FAQ toggle functionality
-            document.querySelectorAll('.faq-question').forEach(question => {
-                question.addEventListener('click', function() {
-                    const faqItem = this.parentElement;
-                    const answer = this.nextElementSibling;
-                    const toggle = this.querySelector('.faq-toggle');
-                    
-                    // Close other open FAQs
-                    document.querySelectorAll('.faq-item').forEach(item => {
-                        if (item !== faqItem) {
-                            item.classList.remove('active');
-                            item.querySelector('.faq-toggle').textContent = '+';
-                        }
-                    });
-                    
-                    // Toggle current FAQ
-                    faqItem.classList.toggle('active');
-                    toggle.textContent = faqItem.classList.contains('active') ? '−' : '+';
-                });
-            });
-
-            // Animate CTA stats
-            const stats = document.querySelectorAll('.cta-stats .stat-number');
-            stats.forEach(stat => {
-                const finalValue = stat.textContent;
-                stat.textContent = '0';
-                
-                let current = 0;
-                const increment = finalValue.includes('+') ? 100 : 1;
-                const target = parseFloat(finalValue);
-                
-                const timer = setInterval(() => {
-                    current += increment;
-                    stat.textContent = current.toFixed(current % 1 === 0 ? 0 : 0) + (finalValue.includes('+') ? '+' : '%');
-                    
-                    if (current >= target) {
-                        stat.textContent = finalValue;
-                        clearInterval(timer);
-                    }
-                }, 50);
-            });
-        });
-    </script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
     <style>
-        .billing-toggle-container {
+        /* Pricing Specific Styles */
+        .pricing-section {
+            padding: 3rem 0;
+        }
+
+        /* Billing Toggle */
+        .billing-toggle {
+            text-align: center;
+            margin-bottom: 3rem;
             display: flex;
             justify-content: center;
-            margin: 2rem 0;
-        }
-
-        .billing-toggle {
-            display: flex;
             align-items: center;
             gap: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1rem 2rem;
-            border-radius: 50px;
+            color: var(--muted);
+        }
+
+        .switch {
             position: relative;
-        }
-
-        .billing-option {
-            color: #94a3b8;
-            font-weight: 500;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .billing-option.active {
-            color: #06b6d4;
-        }
-
-        .toggle-switch {
-            position: relative;
+            display: inline-block;
             width: 60px;
-            height: 30px;
+            height: 34px;
         }
 
-        .toggle-input {
-            display: none;
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
 
-        .toggle-label {
+        .slider {
             position: absolute;
+            cursor: pointer;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: #475569;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: background 0.3s ease;
+            right: 0;
+            bottom: 0;
+            background-color: #475569;
+            transition: 0.4s;
+            border-radius: 34px;
         }
 
-        .toggle-input:checked + .toggle-label {
-            background: linear-gradient(135deg, #06b6d4, #7c3aed);
-        }
-
-        .toggle-handle {
+        .slider:before {
             position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 24px;
-            height: 24px;
-            background: white;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
             border-radius: 50%;
-            transition: transform 0.3s ease;
         }
 
-        .toggle-input:checked + .toggle-label .toggle-handle {
-            transform: translateX(30px);
+        input:checked + .slider {
+            background-color: var(--primary);
         }
 
-        .save-badge {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: linear-gradient(135deg, #10b981, #059669);
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .save-tag {
+            background: var(--success);
             color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
             font-weight: bold;
+            margin-left: 0.5rem;
         }
 
+        /* Pricing Grid */
         .pricing-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
-            margin: 3rem 0;
+            align-items: stretch;
         }
 
         .pricing-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(30, 41, 59, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 2rem;
+            padding: 2.5rem;
             text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .pricing-card.featured {
-            border-color: #06b6d4;
-            transform: scale(1.05);
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.05));
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .pricing-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(6, 182, 212, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .pricing-card.featured {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.1));
+            border-color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(6, 182, 212, 0.4);
         }
 
         .pricing-card.featured:hover {
-            transform: scale(1.05) translateY(-10px);
+            transform: scale(1.05) translateY(-5px);
         }
 
-        .popular-badge {
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #06b6d4, #7c3aed);
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
+        .pricing-card h3 {
+            font-size: 2rem;
+            color: var(--light);
+            margin-bottom: 0.5rem;
+        }
+
+        .price-tag {
+            font-size: 3.5rem;
             font-weight: bold;
-        }
-
-        .plan-header {
-            margin-bottom: 2rem;
-        }
-
-        .plan-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .plan-header h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #f1f5f9;
-        }
-
-        .price {
+            color: var(--primary);
             margin: 1rem 0;
+            line-height: 1;
         }
 
-        .currency {
+        .price-tag sup {
             font-size: 1.5rem;
-            color: #06b6d4;
-            vertical-align: super;
+            top: -1.5rem;
+            color: var(--muted);
         }
 
-        .amount {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #06b6d4;
-        }
-
-        .period {
-            color: #94a3b8;
+        .price-tag span {
             font-size: 1rem;
+            font-weight: normal;
+            color: var(--muted);
+            margin-left: 0.5rem;
         }
 
-        .plan-description {
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-
-        .plan-features {
-            margin: 2rem 0;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .feature-item:last-child {
-            border-bottom: none;
-        }
-
-        .feature-item.disabled {
-            opacity: 0.5;
-        }
-
-        .feature-icon {
-            color: #06b6d4;
-            font-weight: bold;
-        }
-
-        .feature-item.disabled .feature-icon {
-            color: #ef4444;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #06b6d4;
-            color: #06b6d4;
-        }
-
-        .btn-outline:hover {
-            background: #06b6d4;
-            color: white;
-        }
-
-        .btn-large {
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-        }
-
-        .comparison-section {
-            margin: 4rem 0;
-        }
-
-        .comparison-table {
-            margin-top: 2rem;
-        }
-
-        .comparison-header {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 1rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            font-weight: bold;
-        }
-
-        .comparison-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 1rem;
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .comparison-row:hover {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .feature-column {
+        .feature-list {
+            list-style: none;
             text-align: left;
+            margin: 2rem 0;
+            padding: 0;
         }
 
-        .plan-column {
+        .feature-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--light);
+        }
+
+        .feature-list li i {
+            margin-right: 0.5rem;
+            color: var(--success);
+        }
+        
+        .feature-list li .fa-times {
+            color: var(--error);
+        }
+
+        /* Comparison Table */
+        .comparison-section {
+            margin-top: 4rem;
+        }
+
+        .comparison-header, .comparison-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
         }
 
-        .plan-column.featured {
-            color: #06b6d4;
+        .comparison-header {
             font-weight: bold;
+            color: var(--primary);
+            background: rgba(6, 182, 212, 0.1);
+            border-radius: 8px 8px 0 0;
+            padding: 1.5rem 1rem;
         }
 
-        .faq-section {
-            margin: 4rem 0;
+        .comparison-row .feature-name {
+            text-align: left;
+            color: var(--light);
         }
 
-        .faq-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-top: 2rem;
+        .comparison-row .feature-icon {
+            color: var(--success);
         }
 
-        .faq-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            overflow: hidden;
+        .comparison-row .feature-icon.missing {
+            color: var(--error);
         }
 
-        .faq-question {
-            padding: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .faq-question:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .faq-question h4 {
-            margin: 0;
-            color: #f1f5f9;
-        }
-
-        .faq-toggle {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #06b6d4;
-            transition: transform 0.3s ease;
-        }
-
-        .faq-answer {
-            padding: 0 1.5rem;
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .faq-item.active .faq-answer {
-            padding: 0 1.5rem 1.5rem;
-            max-height: 200px;
-        }
-
-        .pricing-cta {
-            margin: 4rem 0;
-        }
-
-        .cta-card {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(124, 58, 237, 0.1));
+        /* Call to Action */
+        .cta-section {
+            margin-top: 4rem;
+            background: rgba(30, 41, 59, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 3rem;
             text-align: center;
         }
@@ -822,6 +222,18 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
             margin: 2rem 0;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #06b6d4;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
         }
 
         .cta-buttons {
@@ -861,7 +273,180 @@
             }
         }
     </style>
+</head>
+<body>
+    <div class="loading-bar"></div>
+    
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">EduTech Pricing</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
+                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-header">
+            <h1>Choose Your Learning Plan</h1>
+            <p>Select the perfect plan that matches your learning goals and budget</p>
+        </div>
+
+        <div class="billing-toggle">
+            <span>Monthly Billing</span>
+            <label class="switch">
+                <input type="checkbox" id="billingToggle">
+                <span class="slider"></span>
+            </label>
+            <span>Annual Billing (Save 20% <span class="save-tag">BEST VALUE</span>)</span>
+        </div>
+
+        <section class="pricing-section">
+            <div class="pricing-grid">
+                
+                <div class="pricing-card">
+                    <h3>Basic</h3>
+                    <p class="text-muted">For beginners exploring their first technology.</p>
+                    <div class="price-tag">$49<span>/month</span></div>
+                    <a href="login.html" class="btn btn-primary btn-auth">Start Free Trial</a>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Access to all Beginner Courses</li>
+                        <li><i class="fas fa-check"></i> Community Support Forum</li>
+                        <li><i class="fas fa-check"></i> Limited Project Feedback</li>
+                        <li><i class="fas fa-times"></i> <span class="text-muted">Expert 1:1 Coaching</span></li>
+                        <li><i class="fas fa-times"></i> <span class="text-muted">Full Certification Suite</span></li>
+                    </ul>
+                </div>
+                
+                <div class="pricing-card featured">
+                    <h3>Pro</h3>
+                    <p class="text-muted">The best value for serious career changers.</p>
+                    <div class="price-tag">$99<span>/month</span></div>
+                    <a href="login.html" class="btn btn-primary btn-auth">Enroll Now</a>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> **Full Course Catalog Access**</li>
+                        <li><i class="fas fa-check"></i> Priority Support and Feedback</li>
+                        <li><i class="fas fa-check"></i> Monthly Live Workshops</li>
+                        <li><i class="fas fa-check"></i> **Full Certification Suite**</li>
+                        <li><i class="fas fa-times"></i> <span class="text-muted">Expert 1:1 Coaching</span></li>
+                    </ul>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Premium</h3>
+                    <p class="text-muted">Maximum support for accelerated learning.</p>
+                    <div class="price-tag">$199<span>/month</span></div>
+                    <a href="login.html" class="btn btn-primary btn-auth">Get Started</a>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check"></i> Full Course Catalog Access</li>
+                        <li><i class="fas fa-check"></i> Dedicated **Expert 1:1 Coaching**</li>
+                        <li><i class="fas fa-check"></i> Career Placement Assistance</li>
+                        <li><i class="fas fa-check"></i> Full Certification Suite</li>
+                        <li><i class="fas fa-check"></i> Lifetime Community Access</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="comparison-section">
+            <h2 class="text-center" style="margin-bottom: 2rem;">Feature Comparison</h2>
+            <div class="card" style="padding: 1.5rem;">
+                <div class="comparison-header">
+                    <span>Feature</span>
+                    <span>Basic</span>
+                    <span>Pro</span>
+                    <span>Premium</span>
+                </div>
+                
+                <div class="comparison-row">
+                    <span class="feature-name">Certificate of Completion</span>
+                    <span class="feature-icon missing"><i class="fas fa-times"></i></span>
+                    <span class="feature-icon"><i class="fas fa-check"></i></span>
+                    <span class="feature-icon"><i class="fas fa-check"></i></span>
+                </div>
+                
+                <div class="comparison-row">
+                    <span class="feature-name">Live Instructor Support</span>
+                    <span class="feature-icon missing"><i class="fas fa-times"></i></span>
+                    <span class="feature-icon"><i class="fas fa-check"></i></span>
+                    <span class="feature-icon"><i class="fas fa-check"></i></span>
+                </div>
+                
+                <div class="comparison-row">
+                    <span class="feature-name">Downloadable Course Files</span>
+                    <span class="feature-icon"><i class="fas fa-check"></i></span>
+                    <span class="feature-icon"><i class="fas fa-check"></i></span>
+                    <span class="feature-icon"><i class="fas fa-check"></i></span>
+                </div>
+                
+                <div class="comparison-row">
+                    <span class="feature-name">Personalized Career Coaching</span>
+                    <span class="feature-icon missing"><i class="fas fa-times"></i></span>
+                    <span class="feature-icon missing"><i class="fas fa-times"></i></span>
+                    <span class="feature-icon"><i class="fas fa-check"></i></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2>Join Over 50,000 Global Learners</h2>
+                <p class="text-muted">Start your free trial today and access a world of tech knowledge.</p>
+                <div class="cta-stats">
+                    <div class="stat">
+                        <div class="stat-number count" data-to="55000+">55,000+</div>
+                        <div class="stat-label">Enrolled Students</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number count" data-to="150">150+</div>
+                        <div class="stat-label">Expert Instructors</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number count" data-to="98">98%</div>
+                        <div class="stat-label">Student Satisfaction</div>
+                    </div>
+                </div>
+                <div class="cta-buttons">
+                    <a href="login.html" class="btn btn-primary btn-auth">Start Your Free Trial</a>
+                    <a href="contact.html" class="btn btn-secondary">Talk to an Advisor</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 EduTech. All rights reserved.</p>
+    </footer>
+
     <script src="assets/js/central-db.js"></script>
     <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script> <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+            
+            const toggle = document.getElementById('billingToggle');
+            const priceTags = document.querySelectorAll('.price-tag');
+            
+            const monthlyPrices = [49, 99, 199];
+            const annualPrices = monthlyPrices.map(p => Math.round(p * 0.8 * 12 / 12)); // 20% off
+            
+            function updatePrices() {
+                const isAnnual = toggle.checked;
+                priceTags.forEach((tag, index) => {
+                    const price = isAnnual ? annualPrices[index] : monthlyPrices[index];
+                    const per = isAnnual ? '/year' : '/month';
+                    tag.innerHTML = `<sup>$</sup>${price}<span>${isAnnual ? ' /year' : '/month'}</span>`;
+                });
+            }
+
+            toggle.addEventListener('change', updatePrices);
+            updatePrices(); // Initial price set
+        });
+    </script>
 </body>
 </html>

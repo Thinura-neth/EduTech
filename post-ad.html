@@ -4,504 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post Your Ad - EduTech</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="firebase-config.js"></script>
     <style>
-        :root {
-            --primary: #06b6d4;
-            --primary-dark: #0891b2;
-            --secondary: #7c3aed;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --dark: #0f172a;
-            --light: #f1f5f9;
-            --gray: #94a3b8;
-            --card-bg: rgba(30, 41, 59, 0.8);
-            --border: rgba(255, 255, 255, 0.1);
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #0f1724 0%, #1e293b 100%);
-            color: #f1f5f9;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        .loading-bar {
-            height: 3px;
-            width: 0;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            transition: width 0.3s ease;
-        }
-
-        .header {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 1rem 2rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: #cbd5e1;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-            background: rgba(6, 182, 212, 0.1);
-        }
-
-        .user-welcome {
-            color: var(--primary);
-            font-weight: 600;
-            margin-right: 1rem;
-        }
-
-        .logout-btn {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
+        /* Specific Styles for Post Ad Page */
         .page-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            padding: 1.5rem 0;
-        }
-
-        .page-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .page-header p {
-            color: var(--gray);
-            font-size: 1.1rem;
-        }
-
-        .ad-form-container {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
             margin-bottom: 2rem;
         }
 
-        .form-section {
-            margin-bottom: 2rem;
+        .ad-form-content {
+            max-width: 700px;
+            margin: 0 auto;
         }
 
-        .form-section h3 {
-            color: #f1f5f9;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary);
-            font-size: 1.3rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #cbd5e1;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #f1f5f9;
-            font-size: 0.95rem;
-            transition: var(--transition);
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
-        }
-
-        .form-group input::placeholder,
-        .form-group textarea::placeholder {
-            color: #64748b;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-row {
+        .package-selection {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .price-input {
+        .package-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
             position: relative;
         }
 
-        .price-input::before {
-            content: "Rs.";
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-weight: 500;
+        .package-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .price-input input {
-            padding-left: 40px;
-        }
-
-        .image-upload {
-            border: 2px dashed var(--border);
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            transition: var(--transition);
-            cursor: pointer;
-            background: rgba(15, 23, 42, 0.5);
-        }
-
-        .image-upload:hover {
+        .package-card.selected {
             border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
             background: rgba(6, 182, 212, 0.1);
         }
 
-        .image-upload i {
+        .package-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .package-card .price {
             font-size: 2rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .image-upload h4 {
-            color: #f1f5f9;
-            margin-bottom: 0.5rem;
-        }
-
-        .image-upload p {
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-
-        .image-upload input {
-            display: none;
-        }
-
-        .image-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .preview-item {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-
-        .preview-item img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-        }
-
-        .remove-image {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            transition: var(--transition);
-        }
-
-        .remove-image:hover {
-            background: rgba(239, 68, 68, 1);
-            transform: scale(1.1);
-        }
-
-        .package-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .package-option {
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            background: rgba(15, 23, 42, 0.5);
-        }
-
-        .package-option:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .package-option.selected {
-            border-color: var(--primary);
-            background: rgba(6, 182, 212, 0.1);
-        }
-
-        .package-name {
-            font-weight: 600;
-            color: #f1f5f9;
-            margin-bottom: 0.5rem;
-        }
-
-        .package-price {
-            font-size: 1.5rem;
             font-weight: bold;
-            color: var(--primary);
+            color: var(--success);
             margin-bottom: 0.5rem;
         }
 
-        .package-features {
-            list-style: none;
-            font-size: 0.85rem;
-            color: var(--gray);
-        }
-
-        .package-features li {
-            margin-bottom: 0.3rem;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.75rem 1.5rem;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 600;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-            text-align: center;
-            font-size: 0.95rem;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #cbd5e1;
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: #f1f5f9;
-        }
-
-        .footer {
-            background: #0f172a;
-            color: #64748b;
-            text-align: center;
-            padding: 1.5rem;
-            margin-top: 2rem;
-            border-top: 1px solid var(--border);
+        .package-card p {
+            color: var(--muted);
             font-size: 0.9rem;
         }
 
-        .auth-message {
-            text-align: center;
-            padding: 3rem;
-            background: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
+        .package-card input[type="radio"] {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
         }
 
-        .auth-message h2 {
-            color: var(--primary);
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
         }
-
-        .auth-message p {
-            color: var(--gray);
-            margin-bottom: 1.5rem;
-        }
-
-        .success-message {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #10b981;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .nav {
-                padding: 1rem;
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .nav-links {
-                gap: 1rem;
-            }
-            
-            .ad-form-container {
-                padding: 1.5rem;
-            }
-            
-            .form-actions {
-                flex-direction: column;
-            }
-            
-            .page-header h1 {
-                font-size: 2rem;
-            }
-        }
-
-        /* Loading animation */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease;
+        
+        /* Hidden input styling for visual selection */
+        .package-selection input[type="radio"] {
+            opacity: 0;
+            position: absolute;
+            width: 0;
+            height: 0;
         }
     </style>
 </head>
@@ -510,11 +94,11 @@
     
     <header class="header">
         <nav class="nav">
-            <div class="logo">EduTech Marketplace</div>
+            <div class="logo">EduTech Ad Posting</div>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="marketplace.html">Marketplace</a></li>
+                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
                 <li><a href="login.html" id="loginLink">Login</a></li>
                 <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
                 <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
@@ -523,283 +107,96 @@
     </header>
 
     <main class="container">
-        <div class="page-header fade-in">
-            <h1>📦 Sell Your Item</h1>
-            <p>Reach thousands of students and educators on EduTech platform</p>
+        <div class="page-header">
+            <h1>Post Your Marketplace Ad</h1>
+            <p>Reach thousands of learners and sellers in our community.</p>
         </div>
 
-        <div id="authMessage" style="display: none;">
-            <div class="auth-message fade-in">
-                <h2>🔐 Login Required</h2>
-                <p>You need to be logged in to post an advertisement.</p>
-                <a href="login.html" class="btn btn-primary">Login Now</a>
-                <p style="margin-top: 1.5rem; color: var(--gray);">Don't have an account? <a href="login.html" style="color: var(--primary); text-decoration: underline;">Register here</a></p>
+        <div id="authMessage" class="auth-message error" style="display: none;">
+            <div class="message-content">
+                <i class="fas fa-lock"></i>
+                You must be logged in to post an advertisement. <a href="login.html">Login here</a>.
             </div>
         </div>
 
-        <div id="adFormContent" style="display: none;">
-            <div class="success-message" id="successMessage" style="display: none;">
-                <i class="fas fa-check-circle"></i> Your ad has been submitted successfully! It will be visible after approval.
-            </div>
+        <div id="adFormContent" class="ad-form-content card" style="display: none;">
+            <form id="adSubmissionForm">
+                
+                <h2>1. Select Ad Package</h2>
+                <div class="package-selection">
+                    <label for="package-basic" class="package-card" id="card-basic">
+                        <input type="radio" id="package-basic" name="package" value="basic" required onclick="selectPackage('basic')">
+                        <h4>Basic Ad</h4>
+                        <div class="price">$5</div>
+                        <p>7 days active, Standard placement, 1 image.</p>
+                    </label>
+                    <label for="package-premium" class="package-card" id="card-premium">
+                        <input type="radio" id="package-premium" name="package" value="premium" onclick="selectPackage('premium')">
+                        <h4>Premium Ad</h4>
+                        <div class="price">$15</div>
+                        <p>30 days active, Featured placement, 3 images.</p>
+                    </label>
+                </div>
 
-            <div class="ad-form-container fade-in">
-                <form id="adSubmissionForm">
-                    <div class="form-section">
-                        <h3>📝 Item Details</h3>
-                        
-                        <div class="form-group">
-                            <label for="itemTitle">Item Title *</label>
-                            <input type="text" id="itemTitle" required placeholder="e.g., Brand New Laptop, Used Textbooks, etc.">
-                        </div>
+                <h2>2. Ad Details</h2>
+                <div class="form-group">
+                    <label for="adTitle">Ad Title</label>
+                    <input type="text" id="adTitle" required placeholder="e.g., Used Raspberry Pi 4 for Sale">
+                </div>
+                
+                <div class="form-group">
+                    <label for="adDescription">Description</label>
+                    <textarea id="adDescription" required placeholder="Provide a detailed description of the item or service."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adPrice">Price ($)</label>
+                    <input type="number" id="adPrice" required min="0" placeholder="Enter price or 0 for Negotiable">
+                </div>
+                
+                <div class="form-group">
+                    <label for="adImage">Upload Image (Max 1)</label>
+                    <input type="file" id="adImage" accept="image/*" required>
+                </div>
 
-                        <div class="form-group">
-                            <label for="itemCategory">Category *</label>
-                            <select id="itemCategory" required>
-                                <option value="">Select Category</option>
-                                <option value="electronics">Electronics</option>
-                                <option value="books">Books & Stationery</option>
-                                <option value="furniture">Furniture</option>
-                                <option value="clothing">Clothing</option>
-                                <option value="services">Services</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
+                <h2>3. Contact Details</h2>
+                <div class="form-group">
+                    <label for="sellerName">Your Name</label>
+                    <input type="text" id="sellerName" required placeholder="Your Name" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sellerEmail">Your Email</label>
+                    <input type="email" id="sellerEmail" required placeholder="Your Email" readonly>
+                </div>
 
-                        <div class="form-group">
-                            <label for="itemDescription">Description *</label>
-                            <textarea id="itemDescription" required placeholder="Describe your item in detail... (condition, features, specifications)" rows="4"></textarea>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="itemPrice">Price (LKR) *</label>
-                                <div class="price-input">
-                                    <input type="number" id="itemPrice" required min="0" placeholder="0.00">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="itemCondition">Condition *</label>
-                                <select id="itemCondition" required>
-                                    <option value="">Select Condition</option>
-                                    <option value="new">Brand New</option>
-                                    <option value="used">Used - Like New</option>
-                                    <option value="good">Used - Good</option>
-                                    <option value="fair">Used - Fair</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <h3>🖼️ Item Images</h3>
-                        <div class="form-group">
-                            <div class="image-upload" onclick="document.getElementById('itemImages').click()">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <h4>Click to Upload Images</h4>
-                                <p>Maximum 5 images • JPG, PNG • Max 2MB each</p>
-                                <input type="file" id="itemImages" multiple accept="image/*" onchange="previewImages()">
-                            </div>
-                            <div class="image-preview" id="imagePreview"></div>
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <h3>👤 Contact Information</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="sellerName">Your Name *</label>
-                                <input type="text" id="sellerName" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="sellerPhone">Phone Number *</label>
-                                <input type="tel" id="sellerPhone" required placeholder="07X XXX XXXX">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="sellerEmail">Email Address *</label>
-                            <input type="email" id="sellerEmail" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="sellerLocation">Location *</label>
-                            <input type="text" id="sellerLocation" required placeholder="City, District">
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <h3>💎 Advertising Package</h3>
-                        <div class="package-options">
-                            <div class="package-option" onclick="selectPackage('basic')" id="packageBasic">
-                                <div class="package-name">Basic</div>
-                                <div class="package-price">Free</div>
-                                <ul class="package-features">
-                                    <li>✓ 7 days listing</li>
-                                    <li>✓ Basic visibility</li>
-                                    <li>✓ 5 images</li>
-                                    <li>✗ No highlighting</li>
-                                </ul>
-                            </div>
-
-                            <div class="package-option" onclick="selectPackage('standard')" id="packageStandard">
-                                <div class="package-name">Standard</div>
-                                <div class="package-price">Rs. 299</div>
-                                <ul class="package-features">
-                                    <li>✓ 14 days listing</li>
-                                    <li>✓ Medium visibility</li>
-                                    <li>✓ 5 images</li>
-                                    <li>✓ Highlighted listing</li>
-                                </ul>
-                            </div>
-
-                            <div class="package-option" onclick="selectPackage('premium')" id="packagePremium">
-                                <div class="package-name">Premium</div>
-                                <div class="package-price">Rs. 599</div>
-                                <ul class="package-features">
-                                    <li>✓ 30 days listing</li>
-                                    <li>✓ Top visibility</li>
-                                    <li>✓ 5 images</li>
-                                    <li>✓ Featured placement</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="window.location.href='marketplace.html'">
-                            <i class="fas fa-arrow-left"></i> Cancel
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i> Submit Ad
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <div class="form-group mt-3">
+                    <button type="submit" class="btn btn-primary btn-auth">Submit Ad for Review</button>
+                    <p class="text-center text-muted mt-2">All ads are subject to admin approval.</p>
+                </div>
+            </form>
         </div>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2024 EduTech Marketplace. All rights reserved.</p>
+        <p>&copy; 2024 EduTech. All rights reserved.</p>
     </footer>
 
+    <script src="assets/js/central-db.js"></script>
     <script src="assets/js/auth.js"></script>
-    <script src="assets/js/marketplace.js"></script>
+    <script src="assets/js/realtime-ads.js"></script>
+    <script src="assets/js/ads-manager.js"></script>
     <script>
-        let selectedPackage = 'basic';
-        let uploadedImages = [];
-
-        function selectPackage(packageType) {
-            selectedPackage = packageType;
-            
-            // Remove selected class from all packages
-            document.querySelectorAll('.package-option').forEach(pkg => {
-                pkg.classList.remove('selected');
-            });
-            
-            // Add selected class to chosen package
-            document.getElementById(`package${packageType.charAt(0).toUpperCase() + packageType.slice(1)}`).classList.add('selected');
+        function selectPackage(pkg) {
+            document.querySelectorAll('.package-card').forEach(card => card.classList.remove('selected'));
+            document.getElementById(`card-${pkg}`).classList.add('selected');
+            document.getElementById(`package-${pkg}`).checked = true;
         }
 
-        function previewImages() {
-            const input = document.getElementById('itemImages');
-            const preview = document.getElementById('imagePreview');
-            const files = input.files;
-            
-            preview.innerHTML = '';
-            uploadedImages = [];
-            
-            for (let i = 0; i < Math.min(files.length, 5); i++) {
-                const file = files[i];
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item';
-                    previewItem.innerHTML = `
-                        <img src="${e.target.result}" alt="Preview">
-                        <button type="button" class="remove-image" onclick="removeImage(${i})">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                    preview.appendChild(previewItem);
-                    
-                    uploadedImages.push({
-                        data: e.target.result,
-                        name: file.name
-                    });
-                }
-                
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function removeImage(index) {
-            uploadedImages.splice(index, 1);
-            previewImages(); // Refresh preview
-        }
-
-        async function submitAd(event) {
-            event.preventDefault();
-            
-            const submitBtn = event.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-            
-            try {
-                const adData = {
-                    title: document.getElementById('itemTitle').value,
-                    category: document.getElementById('itemCategory').value,
-                    description: document.getElementById('itemDescription').value,
-                    price: document.getElementById('itemPrice').value,
-                    condition: document.getElementById('itemCondition').value,
-                    package: selectedPackage,
-                    sellerName: document.getElementById('sellerName').value,
-                    sellerPhone: document.getElementById('sellerPhone').value,
-                    sellerEmail: document.getElementById('sellerEmail').value,
-                    sellerLocation: document.getElementById('sellerLocation').value,
-                    images: uploadedImages,
-                    status: 'pending',
-                    createdAt: new Date().toISOString(),
-                    createdBy: getCurrentUser().id
-                };
-                
-                // Save ad to database
-                const success = await saveUserAd(adData);
-                
-                if (success) {
-                    document.getElementById('successMessage').style.display = 'block';
-                    document.getElementById('adSubmissionForm').reset();
-                    document.getElementById('imagePreview').innerHTML = '';
-                    uploadedImages = [];
-                    
-                    // Scroll to top to show success message
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    
-                    // Reset package selection
-                    selectPackage('basic');
-                } else {
-                    alert('Error submitting ad. Please try again.');
-                }
-                
-            } catch (error) {
-                console.error('Error submitting ad:', error);
-                alert('Error submitting ad. Please try again.');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            }
-        }
-
-        // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             updateNavigation();
             
-            // Check if user is logged in
+            // Check authentication and display content
             if (!isLoggedIn()) {
                 document.getElementById('authMessage').style.display = 'block';
                 document.getElementById('adFormContent').style.display = 'none';
@@ -816,10 +213,7 @@
                 selectPackage('basic');
             }
             
-            // Add form submit handler
-            document.getElementById('adSubmissionForm').addEventListener('submit', submitAd);
-            
-            // Animate loading bar
+            // Animate loading bar (standard across all pages)
             const loadingBar = document.querySelector('.loading-bar');
             setTimeout(() => {
                 loadingBar.style.width = '100%';
@@ -829,5 +223,5 @@
             }, 100);
         });
     </script>
-\n<script src="assets/js/firebase-config.js"></script>\n<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>\n<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>\n<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>\n<script src="assets/js/realtime-ads.js"></script>\n</body>
+</body>
 </html>

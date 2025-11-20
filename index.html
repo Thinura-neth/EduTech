@@ -5,157 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="firebase-config.js"></script>
-</head>
-<body>
-    <div class="loading-bar"></div>
-    
-    <header class="header">
-        <nav class="nav">
-            <div class="logo">EduTech</div>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="login.html" id="loginLink">Login</a></li>
-                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
-                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main class="container">
-        <section class="hero">
-            <div class="hero-left">
-                <h1>Welcome to EduTech</h1>
-                <p>Your gateway to advanced learning and technology education. Master in-demand skills with our interactive courses and expert guidance.</p>
-                <div class="hero-buttons">
-                    <a href="dashboard.html" class="btn btn-primary">Go to Dashboard</a>
-                    <a href="courses.html" class="btn btn-secondary">Browse Courses</a>
-                </div>
-            </div>
-            <div class="hero-right">
-                <div class="feature-card">
-                    <h3>🚀 Why Choose EduTech?</h3>
-                    <ul class="feature-list">
-                        <li>✅ Interactive Learning Experience</li>
-                        <li>✅ Expert Instructors</li>
-                        <li>✅ Flexible Schedule</li>
-                        <li>✅ Career-Focused Curriculum</li>
-                        <li>✅ Hands-on Projects</li>
-                        <li>✅ Certificate of Completion</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <div class="card">
-            <h2 class="text-center">🎓 Popular Courses</h2>
-            <div class="courses-grid">
-                <div class="course-card">
-                    <div class="course-icon">🌐</div>
-                    <div class="course-info">
-                        <h4>Web Development Bootcamp</h4>
-                        <p>Learn HTML, CSS, JavaScript and modern frameworks like React and Node.js</p>
-                        <div class="course-meta">
-                            <span>$299.99</span>
-                            <span>120 hours</span>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" onclick="redirectToCourses()">Learn More</button>
-                </div>
-                <div class="course-card">
-                    <div class="course-icon">📊</div>
-                    <div class="course-info">
-                        <h4>Data Science Fundamentals</h4>
-                        <p>Python, Machine Learning, Data Analysis and Visualization techniques</p>
-                        <div class="course-meta">
-                            <span>$399.99</span>
-                            <span>100 hours</span>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" onclick="redirectToCourses()">Learn More</button>
-                </div>
-                <div class="course-card">
-                    <div class="course-icon">📱</div>
-                    <div class="course-info">
-                        <h4>Mobile Development</h4>
-                        <p>React Native, Flutter, and iOS/Android development with real projects</p>
-                        <div class="course-meta">
-                            <span>$349.99</span>
-                            <span>90 hours</span>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" onclick="redirectToCourses()">Learn More</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="card stats-card">
-            <h3 class="text-center">📈 Our Impact</h3>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number">10,000+</div>
-                    <div class="stat-label">Students Enrolled</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">50+</div>
-                    <div class="stat-label">Courses Available</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">94%</div>
-                    <div class="stat-label">Success Rate</div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer class="footer">
-        <p>&copy; 2024 EduTech. All rights reserved. | Empowering learners worldwide</p>
-    </footer>
-
-    <script src="assets/js/central-db.js"></script>
-    <script src="assets/js/auth.js"></script>
-    <script>
-        function redirectToCourses() {
-            window.location.href = 'courses.html';
-        }
-
-        function redirectToLogin() {
-            window.location.href = 'login.html';
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            updateNavigation();
-            console.log('Home page loaded successfully');
-        });
-    </script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
     <style>
+        /* Specific Styles for Index Page */
         .hero {
             display: flex;
-            gap: 3rem;
             align-items: center;
-            margin: 3rem 0;
-            padding: 2rem 0;
-        }
-
-        @media (max-width: 768px) {
-            .hero {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-
-        .hero-left {
-            flex: 1;
+            justify-content: space-between;
+            gap: 3rem;
+            padding: 4rem 0;
+            min-height: 500px;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 4rem;
+            line-height: 1.1;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #06b6d4, #7c3aed, #06b6d4);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -187,18 +56,36 @@
             }
         }
 
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
         .feature-card {
             background: rgba(30, 41, 59, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             padding: 2rem;
             backdrop-filter: blur(20px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
         }
 
         .feature-card h3 {
             margin-bottom: 1.5rem;
             color: #06b6d4;
             font-size: 1.5rem;
+        }
+        
+        .feature-card h3 i {
+            margin-right: 0.5rem;
+            color: var(--secondary);
         }
 
         .feature-list {
@@ -209,19 +96,96 @@
         .feature-list li {
             padding: 0.8rem 0;
             color: #cbd5e1;
-            position: relative;
-            padding-left: 0;
-            font-size: 1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .feature-list li:last-child {
             border-bottom: none;
         }
-
-        .stats-card {
-            margin-top: 3rem;
-        }
     </style>
-<script src="assets/js/firebase-config.js"></script>\n</body>
+</head>
+<body>
+    <div class="loading-bar"></div>
+    
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">EduTech</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
+                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-left">
+                <h1>Welcome to EduTech</h1>
+                <p>Your gateway to advanced learning and technology education. Master in-demand skills with our interactive courses and expert guidance.</p>
+                <div class="hero-buttons">
+                    <a href="courses.html" class="btn btn-primary">Browse Courses <i class="fas fa-arrow-right"></i></a>
+                    <a href="services.html" class="btn btn-secondary">Our Services</a>
+                </div>
+            </div>
+            <div class="hero-right">
+                <div class="card">
+                    <h3>Start Your Journey</h3>
+                    <p class="text-muted">Log in or register to access personalized learning paths, track your progress, and join our community.</p>
+                    <a href="login.html" class="btn btn-primary btn-auth">Get Started</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-section mt-5">
+            <div class="page-header" style="margin-bottom: 2rem;">
+                <h2>Why Choose EduTech?</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3><i class="fas fa-laptop-code"></i> Interactive Learning</h3>
+                    <p class="text-muted">Engage with hands-on labs, real-world projects, and code challenges directly in your browser.</p>
+                    <ul class="feature-list">
+                        <li>Real-time coding environments</li>
+                        <li>Project-based curriculum</li>
+                        <li>Instant feedback loops</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3><i class="fas fa-user-tie"></i> Expert-Led Instruction</h3>
+                    <p class="text-muted">Learn from industry veterans and certified experts who bring real-world experience to the classroom.</p>
+                    <ul class="feature-list">
+                        <li>Dedicated instructor support</li>
+                        <li>Monthly live Q&A sessions</li>
+                        <li>Personalized mentorship options</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3><i class="fas fa-cogs"></i> Career Ready Skills</h3>
+                    <p class="text-muted">Our curriculum is designed to teach the most in-demand skills required for today's top tech jobs.</p>
+                    <ul class="feature-list">
+                        <li>Portfolio building assistance</li>
+                        <li>Resume and interview prep</li>
+                        <li>Industry standard tools mastery</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 EduTech. All rights reserved. <a href="contact.html">Contact Us</a></p>
+    </footer>
+
+    <script src="assets/js/central-db.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavigation();
+        });
+    </script>
+</body>
 </html>

@@ -5,294 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - EduTech</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="firebase-config.js"></script>
-</head>
-<body>
-    <div class="loading-bar"></div>
-    
-    <header class="header">
-        <nav class="nav">
-            <div class="logo">EduTech</div>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="login.html" id="loginLink">Login</a></li>
-                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
-                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main class="container">
-        <div class="auth-container">
-            <div class="auth-card pulse">
-                <div class="tab-buttons">
-                    <button class="tab-btn active" onclick="showTab('login')">Login</button>
-                    <button class="tab-btn" onclick="showTab('register')">Register</button>
-                </div>
-
-                <div id="loginTab">
-                    <h2>Login to Your Account</h2>
-                    <form id="loginForm">
-                        <div class="form-group">
-                            <label for="loginEmail">Email Address</label>
-                            <input type="email" id="loginEmail" placeholder="Enter your email" required autocomplete="off">
-                        </div>
-                        <div class="form-group">
-                            <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="new-password">
-                        </div>
-                        <button type="submit" class="btn btn-primary" id="loginSubmitBtn">Sign In</button>
-                    </form>
-                    
-                    <div class="demo-credentials">
-                        <strong>Demo Credentials:</strong><br>
-                        Email: youremail@example.com<br>
-                        Password: xxxxxxxxx
-                    </div>
-                </div>
-
-                <div id="registerTab" style="display: none;">
-                    <h2>Create New Account</h2>
-                    <form id="registerForm">
-                        <div class="form-group">
-                            <label for="registerName">Full Name</label>
-                            <input type="text" id="registerName" placeholder="Enter your full name" autocomplete="off">
-                        </div>
-                        <div class="form-group">
-                            <label for="registerEmail">Email Address</label>
-                            <input type="email" id="registerEmail" placeholder="Enter your email" required autocomplete="off">
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPassword">Password</label>
-                            <input type="password" id="registerPassword" placeholder="Create a password (min 6 characters)" required minlength="6" autocomplete="new-password">
-                        </div>
-                        <button type="submit" class="btn btn-primary" id="registerSubmitBtn">Create Account</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer class="footer">
-        <p>&copy; 2024 EduTech. All rights reserved.</p>
-    </footer>
-
-    <script src="assets/js/central-db.js"></script>
-    <script src="assets/js/auth.js"></script>
-    <script>
-        // Tab switching
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            document.getElementById('loginTab').style.display = tabName === 'login' ? 'block' : 'none';
-            document.getElementById('registerTab').style.display = tabName === 'register' ? 'block' : 'none';
-        }
-
-        // Login form handler
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            console.log('🔄 Login attempt:', email);
-            
-            const submitBtn = document.getElementById('loginSubmitBtn');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Signing In...';
-            submitBtn.disabled = true;
-            
-            try {
-                const result = await login(email, password);
-                
-                if (result && result.success) {
-                    alert('✅ Login successful! Redirecting to dashboard...');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
-                } else {
-                    const errorMsg = result ? result.message : 'Unknown error occurred';
-                    alert('❌ ' + errorMsg);
-                }
-            } catch (error) {
-                console.error('🔥 Login error:', error);
-                alert('❌ Login failed: ' + error.message);
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Register form handler
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const fullName = document.getElementById('registerName').value;
-            
-            console.log('🔄 Registration attempt:', email);
-            
-            const submitBtn = document.getElementById('registerSubmitBtn');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Creating Account...';
-            submitBtn.disabled = true;
-            
-            try {
-                const result = await register(email, password, fullName);
-                
-                if (result && result.success) {
-                    alert('✅ ' + result.message);
-                    showTab('login');
-                    document.getElementById('registerForm').reset();
-                } else {
-                    const errorMsg = result ? result.message : 'Registration failed';
-                    alert('❌ ' + errorMsg);
-                }
-            } catch (error) {
-                console.error('🔥 Registration error:', error);
-                alert('❌ Registration failed: ' + error.message);
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Redirect if already logged in
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🏠 Login page loaded');
-            updateNavigation();
-            
-            // Debug info
-            console.log('🔧 Debug info:');
-            console.log('- Firebase initialized:', typeof clientDB !== 'undefined' ? clientDB.initialized : 'undefined');
-            console.log('- Login function:', typeof login);
-            console.log('- Register function:', typeof register);
-        });
-    </script>
-
     <style>
+        /* Specific Styles from login.html inline style block */
         .auth-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 70vh;
-            padding: 2rem 0;
+            min-height: calc(100vh - 120px);
         }
 
         .auth-card {
-            background: rgba(30, 41, 59, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 3rem;
             width: 100%;
             max-width: 450px;
-            backdrop-filter: blur(20px);
-            animation: fadeInUp 0.6s ease;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            padding: 3rem;
+            margin: 2rem;
+            animation: fadeInUp 0.8s ease-out;
         }
 
         .tab-buttons {
             display: flex;
             margin-bottom: 2rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 4px;
         }
 
         .tab-btn {
             flex: 1;
-            padding: 1rem;
+            padding: 1rem 0;
             background: none;
             border: none;
-            color: #94a3b8;
+            color: var(--muted);
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1rem;
-            font-weight: 500;
-            border-radius: 8px;
+            transition: color 0.3s, border-bottom 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -1px;
         }
 
         .tab-btn.active {
-            color: #06b6d4;
-            background: rgba(6, 182, 212, 0.1);
-            box-shadow: 0 2px 8px rgba(6, 182, 212, 0.2);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #94a3b8;
-            font-weight: 500;
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px 16px;
-            background: rgba(15, 23, 42, 0.8);
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            color: white;
+            color: var(--text);
             font-size: 1rem;
-            transition: all 0.3s ease;
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: #06b6d4;
-            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
-        }
-
-        .demo-credentials {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background: rgba(6, 182, 212, 0.1);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: #94a3b8;
-            border: 1px solid rgba(6, 182, 212, 0.2);
-            text-align: center;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #06b6d4, #7c3aed);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
+        .btn-auth {
             width: 100%;
-            font-size: 1rem;
+            padding: 12px;
+            margin-top: 1rem;
         }
-
-        .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
-        }
-
-        .btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
+        
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -338,5 +112,98 @@
             100% { transform: rotate(360deg); }
         }
     </style>
+</head>
+<body>
+    <div class="loading-bar"></div>
+    
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">EduTech</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="admin.html" id="adminLink" style="display: none;">Admin</a></li>
+                <li><a href="login.html" id="loginLink">Login</a></li>
+                <li><span class="user-welcome" id="userWelcome" style="display: none;"></span></li>
+                <li><button class="logout-btn" onclick="logout()" style="display: none;">Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="auth-container">
+            <div class="auth-card pulse">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="showTab('login')">Login</button>
+                    <button class="tab-btn" onclick="showTab('register')">Register</button>
+                </div>
+
+                <div id="login" class="tab-content active">
+                    <form id="loginForm">
+                        <p class="text-center text-muted mb-3">Demo Credentials: <strong>admin@example.com / password123</strong></p>
+                        <div class="form-group">
+                            <label for="loginEmail">Email Address</label>
+                            <input type="email" id="loginEmail" required placeholder="example@edutech.lk" value="admin@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" required placeholder="**********" value="password123">
+                        </div>
+                        <button type="submit" class="btn btn-auth btn-primary" id="loginSubmit">Login</button>
+                    </form>
+                </div>
+
+                <div id="register" class="tab-content" style="display: none;">
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="registerName">Full Name</label>
+                            <input type="text" id="registerName" required placeholder="Full Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Email Address</label>
+                            <input type="email" id="registerEmail" required placeholder="example@edutech.lk">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password</label>
+                            <input type="password" id="registerPassword" required placeholder="Minimum 6 characters">
+                        </div>
+                        <button type="submit" class="btn btn-auth btn-primary" id="registerSubmit">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 EduTech. All rights reserved.</p>
+    </footer>
+
+    <script src="assets/js/central-db.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        // Tab switching logic
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabId).style.display = 'block';
+            document.querySelector(`.tab-btn[onclick="showTab('${tabId}')"]`).classList.add('active');
+        }
+
+        // Initialize loading bar animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingBar = document.querySelector('.loading-bar');
+            setTimeout(() => {
+                loadingBar.style.width = '100%';
+                setTimeout(() => {
+                    loadingBar.style.opacity = '0';
+                }, 500);
+            }, 100);
+        });
+    </script>
 </body>
 </html>
