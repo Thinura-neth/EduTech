@@ -30,284 +30,178 @@ const projects = [
         category: "design",
         description: "Modern banking interface with seamless user experience and intuitive design patterns.",
         technologies: ["Figma", "UI Design", "Prototyping", "User Research"],
-        features: ["Modern UI", "User Experience", "Prototyping", "Design System"],
+        features: ["Modern UI", "User Experience (UX)", "Design System", "Interactive Prototype"],
         image: "assets/images/projects/design-project-1.jpg",
-        imagePlaceholder: "🏦",
+        imagePlaceholder: "🎨",
         demo: "#",
         github: "#"
     },
     {
         id: 4,
-        title: "Sales Analytics Dashboard",
+        title: "Machine Learning API",
         category: "data",
-        description: "Interactive dashboard for business intelligence and sales performance analysis.",
-        technologies: ["Python", "Tableau", "SQL", "Pandas"],
-        features: ["Data Visualization", "Business Intelligence", "Performance Analysis", "Real-time Data"],
+        description: "A Python-based REST API for predicting housing prices using a trained machine learning model.",
+        technologies: ["Python", "Flask", "Scikit-learn", "Pandas"],
+        features: ["Data Preprocessing", "Model Training", "REST API Endpoint", "Dockerized Deployment"],
         image: "assets/images/projects/data-project-1.jpg",
-        imagePlaceholder: "📊",
-        demo: "#",
-        github: "#"
-    },
-    {
-        id: 5,
-        title: "Social Media Platform",
-        category: "web",
-        description: "Real-time social network with Vue.js and Socket.io featuring instant messaging and content sharing.",
-        technologies: ["Vue.js", "Express", "WebSockets", "MongoDB"],
-        features: ["Real-time Chat", "Content Sharing", "User Profiles", "Notifications"],
-        image: "assets/images/projects/web-project-2.jpg",
-        imagePlaceholder: "👥",
-        demo: "#",
-        github: "#"
-    },
-    {
-        id: 6,
-        title: "Food Delivery App",
-        category: "mobile",
-        description: "React Native app with real-time order tracking and restaurant management system.",
-        technologies: ["React Native", "Redux", "Google Maps", "Firebase"],
-        features: ["Order Tracking", "Restaurant Management", "Real-time Updates", "Payment Integration"],
-        image: "assets/images/projects/mobile-project-2.jpg",
-        imagePlaceholder: "🍕",
-        demo: "#",
-        github: "#"
-    },
-    {
-        id: 7,
-        title: "Travel Booking Website",
-        category: "design",
-        description: "Complete travel booking platform design system with user-friendly interface.",
-        technologies: ["Adobe XD", "Design System", "User Research", "Prototyping"],
-        features: ["Booking System", "User Interface", "Design System", "User Research"],
-        image: "assets/images/projects/design-project-2.jpg",
-        imagePlaceholder: "✈️",
-        demo: "#",
-        github: "#"
-    },
-    {
-        id: 8,
-        title: "COVID-19 Data Analysis",
-        category: "data",
-        description: "Data visualization and predictive modeling for COVID-19 spread analysis.",
-        technologies: ["Pandas", "Matplotlib", "Machine Learning", "Data Analysis"],
-        features: ["Data Visualization", "Predictive Modeling", "Statistical Analysis", "Dashboard"],
-        image: "assets/images/projects/data-project-2.jpg",
-        imagePlaceholder: "🦠",
+        imagePlaceholder: "🧠",
         demo: "#",
         github: "#"
     }
 ];
 
-// Initialize gallery
-function loadGallery() {
-    const galleryGrid = document.getElementById('galleryGrid');
+let currentProjects = projects;
+
+// Function to render projects
+function renderProjects(projectsToRender) {
+    const container = document.getElementById('projectsContainer');
+    container.innerHTML = '';
     
-    galleryGrid.innerHTML = projects.map(project => `
-        <div class="gallery-item" data-category="${project.category}" data-title="${project.title.toLowerCase()}">
-            <div class="gallery-card">
-                <div class="project-image" 
-                     style="background-image: url('${project.image}')"
-                     data-emoji="${project.imagePlaceholder}">
-                </div>
-                <div class="project-overlay">
-                    <div class="project-info">
-                        <h3>${project.title}</h3>
-                        <p>${project.description}</p>
-                        <div class="project-tags">
-                            ${project.technologies.slice(0, 3).map(tech => `<span>${tech}</span>`).join('')}
-                            ${project.technologies.length > 3 ? `<span>+${project.technologies.length - 3} more</span>` : ''}
-                        </div>
+    if (projectsToRender.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted">No projects found for this filter/search.</p>';
+        return;
+    }
+
+    projectsToRender.forEach(project => {
+        const card = document.createElement('div');
+        card.className = 'gallery-card fade-in';
+        card.innerHTML = `
+            <div class="project-image" style="background-image: url('${project.image}');">
+                ${project.image ? '' : project.imagePlaceholder}
+            </div>
+            <div class="project-overlay">
+                <div class="project-info">
+                    <h3>${getCategoryEmoji(project.category)} ${project.title}</h3>
+                    <p>${project.description}</p>
+                    <div class="project-tags">
+                        ${project.technologies.map(tech => `<span class="tag">${tech}</span>`).join('')}
                     </div>
-                    <button class="view-project-btn" onclick="viewProject(${project.id})">View Project</button>
+                </div>
+                <div class="project-actions">
+                    <a href="${project.demo}" class="btn btn-small btn-primary" target="_blank">View Demo</a>
+                    <a href="${project.github}" class="btn btn-small btn-secondary" target="_blank">GitHub</a>
                 </div>
             </div>
-        </div>
-    `).join('');
-
-    // Add animations
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animated');
-            }
-        });
-    }, observerOptions);
-
-    document.querySelectorAll('.gallery-item').forEach(item => {
-        observer.observe(item);
+        `;
+        container.appendChild(card);
     });
 }
 
-// View project details
-function viewProject(projectId) {
-    const project = projects.find(p => p.id === projectId);
-    const modal = document.getElementById('projectModal');
-    const modalContent = document.getElementById('modalContent');
+// Function to filter projects
+function filterProjects(category) {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach(btn => btn.classList.remove('active'));
     
-    modalContent.innerHTML = `
-        <h2>${project.title}</h2>
-        <div class="project-details">
-            <p>${project.description}</p>
-            
-            <div class="project-specs">
-                <div class="spec-section">
-                    <h4>🛠️ Technologies Used</h4>
-                    <div class="tech-tags">
-                        ${project.technologies.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
-                    </div>
-                </div>
-                
-                <div class="spec-section">
-                    <h4>✨ Key Features</h4>
-                    <ul>
-                        ${project.features.map(feature => `<li>${feature}</li>`).join('')}
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="project-links">
-                <a href="${project.demo}" class="btn btn-primary" target="_blank">Live Demo</a>
-                <a href="${project.github}" class="btn btn-secondary" target="_blank">GitHub</a>
-            </div>
-        </div>
-    `;
+    document.querySelector(`.filter-btn[data-category="${category}"]`).classList.add('active');
+
+    if (category === 'all') {
+        currentProjects = projects;
+    } else {
+        currentProjects = projects.filter(p => p.category === category);
+    }
     
-    modal.style.display = 'block';
+    // Re-apply search filter if there's text in the search box
+    searchProjects(); 
 }
 
-// Project submission form functions
-function showProjectForm() {
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        alert('Please login to submit a project.');
+// Function to search projects
+function searchProjects() {
+    const searchInput = document.getElementById('projectSearch');
+    const query = searchInput.value.toLowerCase().trim();
+    
+    if (query === '') {
+        renderProjects(currentProjects); // Render currently filtered projects
+        return;
+    }
+
+    const filteredAndSearched = currentProjects.filter(project => 
+        project.title.toLowerCase().includes(query) ||
+        project.description.toLowerCase().includes(query) ||
+        project.technologies.some(tech => tech.toLowerCase().includes(query))
+    );
+
+    renderProjects(filteredAndSearched);
+}
+
+// Function to handle form submission (submit project)
+function submitProject(event) {
+    event.preventDefault();
+
+    const title = document.getElementById('projectTitle').value.trim();
+    const category = document.getElementById('projectCategory').value;
+    const description = document.getElementById('projectDescription').value.trim();
+    const technologies = document.getElementById('projectTechnologies').value.split(',').map(t => t.trim());
+    const features = document.getElementById('projectFeatures').value.split(',').map(f => f.trim());
+    const demo = document.getElementById('projectDemo').value.trim();
+    const github = document.getElementById('projectGithub').value.trim();
+
+    if (!title || !category || !description) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+
+    const newProject = {
+        id: Date.now(), // Unique ID
+        title,
+        category,
+        description,
+        technologies,
+        features,
+        image: "assets/images/projects/placeholder.jpg", // Placeholder for user submissions
+        imagePlaceholder: "❓",
+        demo,
+        github,
+        status: 'pending' // Should be approved by admin in a real system
+    };
+
+    // In a real application, you'd send this to Firebase using a function like:
+    // clientDB.saveProject(newProject).then(...)
+    console.log('Project submitted:', newProject);
+    alert('Project submitted for review! (Demo submission: Data not persisted)');
+    
+    closeProjectForm();
+    document.getElementById('projectSubmissionForm').reset();
+}
+
+// Function to open the project submission modal
+function openProjectForm() {
+    if (!isLoggedIn()) {
+        alert('Please log in to submit a project.');
         window.location.href = 'login.html';
         return;
     }
-    
-    document.getElementById('projectFormModal').style.display = 'block';
+    document.getElementById('projectModal').style.display = 'flex';
 }
 
+// Function to close the project submission modal
 function closeProjectForm() {
-    document.getElementById('projectFormModal').style.display = 'none';
-    document.getElementById('projectForm').reset();
+    document.getElementById('projectModal').style.display = 'none';
 }
 
-// Firebase project submission
-async function submitProjectToFirebase(projectData) {
-    try {
-        const user = firebase.auth().currentUser;
-        if (!user) throw new Error('User not authenticated');
-
-        const projectRef = firebase.database().ref('projects').push();
-        await projectRef.set({
-            ...projectData,
-            submittedBy: user.uid,
-            submittedAt: firebase.database.ServerValue.TIMESTAMP,
-            status: 'pending'
-        });
-        
-        return true;
-    } catch (error) {
-        console.error('Error submitting project:', error);
-        return false;
-    }
-}
-
-// Initialize when DOM is loaded
+// Initialize gallery on load
 document.addEventListener('DOMContentLoaded', function() {
-    updateNavigation();
-    loadGallery();
+    // Initial render
+    renderProjects(projects);
 
-    // Gallery filtering
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const galleryItems = document.querySelectorAll('.gallery-item');
-    const searchInput = document.getElementById('searchInput');
-
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const filter = this.getAttribute('data-filter');
-            
-            // Update active button
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Filter items
-            galleryItems.forEach(item => {
-                if (filter === 'all' || item.getAttribute('data-category') === filter) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
+    // Attach filter event listeners
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => filterProjects(btn.dataset.category));
     });
 
-    // Search functionality
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        
-        galleryItems.forEach(item => {
-            const title = item.getAttribute('data-title');
-            if (title.includes(searchTerm)) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
+    // Attach search event listener
+    document.getElementById('projectSearch').addEventListener('input', searchProjects);
+    
+    // Attach form submission listener
+    document.getElementById('projectSubmissionForm').addEventListener('submit', submitProject);
+    
+    // Attach modal close listener
+    document.querySelector('.modal-content .close-btn').addEventListener('click', closeProjectForm);
+    
+    // Initial filter set
+    document.querySelector('.filter-btn[data-category="all"]').click();
 
-    // Modal functionality
-    const modals = document.querySelectorAll('.modal');
-    const closeBtns = document.querySelectorAll('.close-modal');
-
-    closeBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            modals.forEach(modal => {
-                modal.style.display = 'none';
-            });
-        });
-    });
-
-    window.addEventListener('click', function(event) {
-        modals.forEach(modal => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-    });
-
-    // Project form submission
-    document.getElementById('projectForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = {
-            title: document.getElementById('projectTitle').value,
-            category: document.getElementById('projectCategory').value,
-            description: document.getElementById('projectDescription').value,
-            technologies: document.getElementById('projectTechnologies').value.split(',').map(tech => tech.trim()),
-            features: document.getElementById('projectFeatures').value.split(',').map(feature => feature.trim()),
-            demo: document.getElementById('projectDemo').value || '#',
-            github: document.getElementById('projectGithub').value || '#',
-            imagePlaceholder: getCategoryEmoji(document.getElementById('projectCategory').value)
-        };
-
-        const success = await submitProjectToFirebase(formData);
-        if (success) {
-            alert('Project submitted successfully! It will be reviewed before appearing in the gallery.');
-            closeProjectForm();
-        } else {
-            alert('Error submitting project. Please try again.');
-        }
-    });
-
-    // Animate stats
-    const stats = document.querySelectorAll('.stat-number');
-    stats.forEach(stat => {
+    // Animate stats (from other page logic, included for completeness)
+    document.querySelectorAll('.stat-number').forEach(stat => {
         const finalValue = stat.textContent;
         stat.textContent = '0';
         
@@ -317,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const timer = setInterval(() => {
             current += increment;
-            stat.textContent = current.toFixed(current % 1 === 0 ? 0 : 0) + (finalValue.includes('+') ? '+' : '%');
+            stat.textContent = current.toFixed(current % 1 === 0 ? 0 : 0) + (finalValue.includes('+') ? '+' : '');
             
             if (current >= target) {
                 stat.textContent = finalValue;
@@ -340,6 +234,10 @@ function getCategoryEmoji(category) {
 
 // Load projects from Firebase (optional)
 function loadProjectsFromFirebase() {
+    if(!firebase.apps.length) {
+        console.warn("Firebase not initialized. Cannot load projects from database.");
+        return;
+    }
     const projectsRef = firebase.database().ref('projects');
     projectsRef.on('value', (snapshot) => {
         const projectsData = snapshot.val();
@@ -349,7 +247,9 @@ function loadProjectsFromFirebase() {
                 .filter(project => project.status === 'approved');
             
             // You can merge with static projects or replace them
-            console.log('Loaded projects from Firebase:', approvedProjects);
+            // For now, we only log it
+            console.log('Loaded projects from Firebase (data not merged for demo):', approvedProjects);
         }
     });
 }
+// loadProjectsFromFirebase(); // Uncomment to fetch from DB

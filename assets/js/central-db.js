@@ -23,98 +23,154 @@ class CentralDB {
         }
     }
 
-    // --- User Management (Updated for Firebase Auth) ---
-    // Insecure verifyUser(email, password) and the old registerUser() functions are REMOVED.
+    // User Management
+    async verifyUser(email, password) {
+        if (!this.initialized) {
+            console.error('Firebase not initialized');
+            return null;
+        }
 
-    // New function to save user profile data after successful Firebase Auth registration
-    async saveUserProfile(uid, full_name, email, role = 'user') {
-        if (!this.initialized) {
-            console.error('Firebase not initialized');
-            return null;
-        }
         try {
-            const usersRef = this.db.ref('users/' + uid);
-            const userData = {
-                full_name,
-                email,
-                role,
-                created_at: new Date().toISOString()
-            };
-            await usersRef.set(userData);
-            console.log('✅ User profile saved to DB:', email);
-            return { id: uid, ...userData };
-        } catch (error) {
-            console.error('❌ Error saving user profile:', error);
-            return null;
-        }
-    }
-    
-    // New function to fetch user profile data for session management (uses UID from Firebase Auth)
-    async fetchUserProfile(uid) {
-        if (!this.initialized) {
-            console.error('Firebase not initialized');
-            return null;
-        }
-        try {
-            const snapshot = await this.db.ref('users/' + uid).once('value');
+            const snapshot = await this.db.ref('users').orderByChild('email').equalTo(email).once('value');
+            
             if (snapshot.exists()) {
-                const user = snapshot.val();
-                return {
-                    id: uid,
-                    ...user
-                };
+                const users = snapshot.val();
+                const userId = Object.keys(users)[0];
+                const user = users[userId];
+                
+                if (user.password === password) {
+                    console.log('✅ User verified:', email);
+                    return {
+                        id: userId,
+                        ...user
+                    };
+                }
             }
+            
+            console.log('❌ Invalid credentials for:', email);
             return null;
         } catch (error) {
-            console.error('❌ Error fetching user profile:', error);
+            console.error('Error verifying user:', error);
             return null;
         }
     }
 
-    // Function to update profile (useful for the profile.html page)
-    async updateProfile(user_id, updates) {
+    async registerUser(fullName, email, password) {
         if (!this.initialized) {
             console.error('Firebase not initialized');
             return false;
         }
+
         try {
-            await this.db.ref('users/' + user_id).update(updates);
-            console.log('✅ User profile updated:', user_id);
+            // Check if user already exists
+            const snapshot = await this.db.ref('users').orderByChild('email').equalTo(email).once('value');
+            if (snapshot.exists()) {
+                console.warn('❌ Registration failed: Email already exists');
+                return false;
+            }
+
+            const newUserRef = this.db.ref('users').push();
+            const newUserId = newUserRef.key;
+            
+            const userData = {
+                full_name: fullName,
+                email: email,
+                password: password, // In a real app, hash this!
+                role: 'user', // Default role
+                created_at: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            await newUserRef.set(userData);
+            console.log('✅ User registered successfully:', email);
+            return { id: newUserId, ...userData };
+
+        } catch (error) {
+            console.error('❌ Error registering user:', error);
+            return false;
+        }
+    }
+
+    async updateUserDetails(userId, data) {
+        if (!this.initialized) return false;
+        try {
+            const userRef = this.db.ref(`users/${userId}`);
+            await userRef.update(data);
+            console.log('✅ User details updated:', userId);
             return true;
         } catch (error) {
-            console.error('❌ Error updating user profile:', error);
+            console.error('❌ Error updating user details:', error);
             return false;
         }
     }
 
-    // --- Ad Management (These functions remain the same as the original demo) ---
+    // =================================================================
+    // AD/MARKETPLACE Management (using both Firebase & LocalStorage for demo)
+    // =================================================================
 
-    async saveUserAd(adData) {
-        if (this.initialized) {
-            try {
-                const newAdRef = this.db.ref('user_ads').push();
-                const adId = newAdRef.key;
-                const payload = {
-                    id: adId,
-                    ...adData,
-                    status: 'approved', // Auto-approve for demo
-                    views: 0,
-                    createdAt: new Date().toISOString()
-                };
-                await newAdRef.set(payload);
-                return true;
-            } catch (error) {
-                console.error('Error saving ad to Firebase:', error);
-            }
-        }
+    async saveUserAd(adData, imageFile) {
+        // Firebase Storage functions are NOT available in v8 CDN for Realtime Database/App-Only setup.
+        // We will mock file upload logic here for Realtime Ads API.
+        console.log('⚠️ Using localStorage fallback for user ad saving and fetching as Firebase Storage is not initialized in this simplified setup.');
+        
         // Fallback to localStorage
         return this.saveUserAdToLocalStorage(adData);
     }
-    
-    // (Other ad management functions like getUserAds, saveUserAdToLocalStorage, etc. 
-    // from the original file should follow here to complete the class)
-    // Since I cannot access the full original file, please ensure your original functions 
-    // are included here if you want a complete file replacement.
 };
 
 const clientDB = new CentralDB();
+
+// Fallback logic (for demo simplicity without Firebase Storage)
+clientDB.getUserAds = async function() {
+    try {
+        // Mock Firebase Realtime Database logic (if it were implemented)
+        // const adsRef = clientDB.db.ref('user_ads');
+        // const snapshot = await adsRef.once('value');
+        // const adsData = snapshot.val();
+        
+        // if (!adsData) return [];
+        
+        // return Object.values(adsData).filter(ad => ad.status === 'approved');
+        
+        throw new Error('Using localStorage for demo ads.');
+    } catch (error) {
+        // console.error('Error getting user ads:', error);
+        
+        // Fallback to localStorage
+        return this.getUserAdsFromLocalStorage();
+    }
+};
+
+clientDB.saveUserAdToLocalStorage = function(adData) {
+    try {
+        const ads = JSON.parse(localStorage.getItem('edutech_user_ads') || '[]');
+        const adId = 'ad_' + Date.now();
+        
+        ads.push({
+            id: adId,
+            ...adData,
+            status: 'approved', // Auto-approve for demo
+            views: 0,
+            createdAt: new Date().toISOString(),
+            imageUrl: 'assets/images/placeholder-ad.png' // Mock image for localStorage
+        });
+        
+        localStorage.setItem('edutech_user_ads', JSON.stringify(ads));
+        return true;
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+        return false;
+    }
+};
+
+clientDB.getUserAdsFromLocalStorage = function() {
+    try {
+        const ads = JSON.parse(localStorage.getItem('edutech_user_ads') || '[]');
+        return ads.filter(ad => ad.status === 'approved');
+    } catch (error) {
+        console.error('Error getting from localStorage:', error);
+        return [];
+    }
+};
+
+// Make the clientDB instance available globally
+window.clientDB = clientDB;

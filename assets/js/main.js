@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function(){
       this.innerText = document.documentElement.classList.contains('alt-theme') ? 'Light' : 'Dark';
     });
   }
+  
   // Simple animated counters
   document.querySelectorAll('.count').forEach(el=>{
     const end = +el.dataset.to || 0;
