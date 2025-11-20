@@ -1,3 +1,4 @@
+// Global interactions (Theme toggle is mostly CSS variables, menu toggle is simple DOM)
 
 function toggleMenu(){
   let nav=document.getElementById("mobileNav");
