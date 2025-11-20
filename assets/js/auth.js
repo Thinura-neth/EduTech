@@ -1,7 +1,7 @@
-// assets/js/auth.js - Complete Authentication System (Firebase Only) - නිවැරදි කළ
+// assets/js/auth.js - Complete Authentication System (Firebase Auth Implemented)
 let currentUser = null;
 
-// Check if user is logged in
+// Check if user is logged in (Local cache check)
 function isLoggedIn() {
     const userId = localStorage.getItem('user_id');
     const userEmail = localStorage.getItem('user_email');
@@ -16,6 +16,7 @@ function isLoggedIn() {
         };
         return true;
     }
+    currentUser = null;
     return false;
 }
 
@@ -36,203 +37,178 @@ function isAdmin() {
 // Require admin access
 function requireAdmin() {
     if (!isLoggedIn()) {
-        alert('Please login to access this feature.');
         window.location.href = 'login.html';
         return false;
     }
     
     if (!isAdmin()) {
-        alert('Admin privileges required.');
+        window.location.href = 'dashboard.html?denied=true';
         return false;
     }
     
     return true;
 }
 
-// Login function - Firebase Only
-async function login(email, password) {
-    console.log('🔐 Firebase login attempt:', email);
-    
-    // Show loading state
-    const submitBtn = document.getElementById('loginSubmitBtn');
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Signing In...';
-    }
-
-    try {
-        // Verify user with Firebase
-        const user = await clientDB.verifyUser(email, password);
-        
-        if (user) {
-            console.log('✅ Login successful:', email);
-            
-            // Store user data in localStorage
-            localStorage.setItem('user_id', user.id);
-            localStorage.setItem('user_email', user.email);
-            localStorage.setItem('user_name', user.full_name || user.email.split('@')[0]);
-            localStorage.setItem('user_role', user.role || 'user');
-            localStorage.setItem('user_created_at', user.created_at || new Date().toISOString());
-            
-            currentUser = user;
-            
-            // Update login info in database
-            await clientDB.updateUser(user.id, {
-                last_login: new Date().toISOString(),
-                login_count: (user.login_count || 0) + 1
-            });
-
-            // Log the login action
-            await clientDB.logAction(user, 'LOGIN', 'User logged in successfully');
-
-            return {
-                success: true,
-                message: 'Login successful! Redirecting...',
-                user: user
-            };
-        } else {
-            console.log('❌ Login failed - invalid credentials');
-            return {
-                success: false,
-                message: 'Invalid email or password. Please try again.'
-            };
-        }
-        
-    } catch (error) {
-        console.error('🔥 Login error:', error);
-        return {
-            success: false,
-            message: 'Login failed. Please check your connection and try again.'
-        };
-    } finally {
-        // Reset button state
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Sign In';
-        }
-    }
+// Store session data locally
+function storeSession(user) {
+    localStorage.setItem('user_id', user.id);
+    localStorage.setItem('user_email', user.email);
+    localStorage.setItem('user_name', user.full_name);
+    localStorage.setItem('user_role', user.role);
+    localStorage.setItem('user_created_at', user.created_at);
 }
 
-// Register function - Firebase Only
-async function register(email, password, fullName = '') {
-    console.log('📝 Firebase registration attempt:', email);
-    
-    // Show loading state
-    const submitBtn = document.getElementById('registerSubmitBtn');
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Creating Account...';
-    }
-
-    try {
-        // Create user with Firebase
-        const user = await clientDB.createUser(email, password, fullName);
-        
-        if (user) {
-            console.log('✅ Registration successful:', email);
-            
-            // Store user data in localStorage and auto-login
-            localStorage.setItem('user_id', user.id);
-            localStorage.setItem('user_email', user.email);
-            localStorage.setItem('user_name', user.full_name);
-            localStorage.setItem('user_role', user.role);
-            localStorage.setItem('user_created_at', user.created_at);
-            
-            currentUser = user;
-
-            return {
-                success: true,
-                message: 'Registration successful! You are now logged in.',
-                user: user
-            };
-        } else {
-            console.log('❌ Registration failed - user might already exist');
-            return {
-                success: false,
-                message: 'Registration failed. This email might already be registered.'
-            };
-        }
-        
-    } catch (error) {
-        console.error('🔥 Registration error:', error);
-        return {
-            success: false,
-            message: 'Registration failed. Please try again.'
-        };
-    } finally {
-        // Reset button state
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Create Account';
-        }
-    }
-}
-
-// Logout function
-function logout() {
-    const user = getCurrentUser();
-    console.log('🚪 Logging out user:', user?.email);
-    
-    // Log the logout action
-    if (user) {
-        clientDB.logAction(user, 'LOGOUT', 'User logged out');
-    }
-    
-    // Clear localStorage
+// Clear session data locally
+function clearSession() {
     localStorage.removeItem('user_id');
     localStorage.removeItem('user_email');
     localStorage.removeItem('user_name');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_created_at');
-    
     currentUser = null;
-    
-    // Redirect to home page
-    window.location.href = 'index.html';
 }
 
-// Update navigation based on login status
+// --- CORE AUTH FUNCTIONS (UPDATED FOR FIREBASE AUTH) ---
+
+// Login function - NOW uses Firebase Authentication
+async function login(email, password) {
+    console.log('🔐 Firebase Auth login attempt:', email);
+    setLoading(true);
+    
+    try {
+        // 1. Use Firebase Auth to sign in
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+        const authUser = userCredential.user;
+        
+        // 2. Fetch extended profile data from Realtime DB
+        const fullUser = await clientDB.fetchUserProfile(authUser.uid);
+        
+        if (!fullUser) {
+            await firebase.auth().signOut();
+            throw new Error("User profile missing in database. Please register again.");
+        }
+
+        // 3. Success: Redirect (Session is stored by onAuthStateChanged listener)
+        window.location.href = 'dashboard.html';
+
+    } catch (error) {
+        console.error('❌ Login failed:', error.message);
+        // Error message cleanup for better user display
+        displayError(error.message.replace('Firebase: ', '').replace(/\(.*\)/, ''));
+        setLoading(false);
+    }
+}
+
+// Register function - NOW uses Firebase Authentication
+async function register(full_name, email, password) {
+    console.log('✍️ Firebase Auth registration attempt:', email);
+    setLoading(true);
+
+    try {
+        // 1. Use Firebase Auth to create user (handles secure password hashing)
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        const authUser = userCredential.user;
+
+        // 2. Save non-sensitive profile data to Realtime DB
+        const newUser = await clientDB.saveUserProfile(authUser.uid, full_name, email, 'user');
+        
+        if (!newUser) {
+            // If DB save failed, delete the auth user (cleanup)
+            await authUser.delete();
+            throw new Error("Failed to save user profile. Please try again.");
+        }
+
+        // 3. Success: Redirect
+        window.location.href = 'dashboard.html';
+
+    } catch (error) {
+        console.error('❌ Registration failed:', error.message);
+        displayError(error.message.replace('Firebase: ', '').replace(/\(.*\)/, ''));
+        setLoading(false);
+    }
+}
+
+// Logout function - Use Firebase Auth sign out
+function logout() {
+    firebase.auth().signOut().then(() => {
+        // The onAuthStateChanged listener will handle clearSession and updateNavigation
+        console.log('User signed out via Firebase');
+        window.location.href = 'index.html';
+    }).catch(error => {
+        console.error('Logout failed:', error.message);
+    });
+}
+
+// --- UI HELPERS ---
+
+// Set loading state on submit button
+function setLoading(isLoading) {
+    const submitBtn = document.getElementById('loginBtn') || document.getElementById('registerBtn');
+    if (submitBtn) {
+        // Store original text if not already stored
+        if (!submitBtn.dataset.originalText) {
+            submitBtn.dataset.originalText = submitBtn.innerText;
+        }
+
+        if (isLoading) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Loading...';
+        } else {
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+            submitBtn.innerText = submitBtn.dataset.originalText;
+        }
+    }
+}
+
+// Display error message
+function displayError(message) {
+    const errorDiv = document.getElementById('authError');
+    if (errorDiv) {
+        errorDiv.innerText = message;
+        errorDiv.style.display = 'block';
+        setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
+    } else {
+        alert(message);
+    }
+}
+
+// Update UI elements based on auth status
 function updateNavigation() {
+    const isLoggedInUser = isLoggedIn();
+    const isUserAdmin = isAdmin();
     const loginLink = document.getElementById('loginLink');
     const userWelcome = document.getElementById('userWelcome');
     const logoutBtn = document.querySelector('.logout-btn');
     const adminLink = document.getElementById('adminLink');
-    
-    if (isLoggedIn()) {
+
+    if (isLoggedInUser) {
         const user = getCurrentUser();
-        const userName = user.full_name || user.email.split('@')[0];
-        
-        // Show user welcome and logout button
+
+        if (loginLink) {
+            loginLink.style.display = 'none';
+        }
         if (userWelcome) {
-            userWelcome.textContent = `Welcome, ${userName}`;
+            userWelcome.innerText = `Welcome, ${user.full_name || user.email.split('@')[0]}!`;
             userWelcome.style.display = 'inline';
         }
-        
         if (logoutBtn) {
             logoutBtn.style.display = 'inline-block';
         }
         
-        // Hide login link
-        if (loginLink) {
-            loginLink.style.display = 'none';
-        }
-        
-        // Show admin link if user is admin
-        if (adminLink && user.role === 'admin') {
-            adminLink.style.display = 'inline';
+        if (adminLink) {
+            adminLink.style.display = isUserAdmin ? 'block' : 'none';
         }
 
-        console.log('✅ Navigation updated for logged in user:', userName);
+        console.log('✅ Navigation updated for logged in user');
     } else {
-        // Show login link, hide user info
         if (loginLink) {
             loginLink.style.display = 'inline';
         }
-        
         if (userWelcome) {
             userWelcome.style.display = 'none';
         }
-        
         if (logoutBtn) {
             logoutBtn.style.display = 'none';
         }
@@ -245,24 +221,42 @@ function updateNavigation() {
     }
 }
 
-// Initialize auth system when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔐 Auth system initializing...');
-    
-    // Wait a bit for Firebase to initialize
-    setTimeout(() => {
-        updateNavigation();
-        
-        // Debug info
-        if (isLoggedIn()) {
-            console.log('✅ User is logged in:', getCurrentUser());
-        } else {
-            console.log('❌ No user logged in');
-            console.log('💡 Demo credentials: admin@example.com / password123');
-        }
-    }, 1000);
-});
+// --- FIREBASE AUTH STATE LISTENER (New & Crucial) ---
+// This handles session persistence across page loads
+// Note: Requires firebase-auth.js SDK loaded in HTML
+if (typeof firebase !== 'undefined' && typeof clientDB !== 'undefined') {
+    firebase.auth().onAuthStateChanged(async (authUser) => {
+        if (authUser) {
+            // User is signed in via Firebase Auth
+            console.log('✅ Firebase Auth State Changed: User is signed in');
+            
+            // Fetch full profile data from Realtime DB
+            const fullUser = await clientDB.fetchUserProfile(authUser.uid);
+            
+            if (fullUser) {
+                // Store/update local session cache
+                storeSession(fullUser);
+                currentUser = fullUser;
+            } else {
+                console.warn("User authenticated but profile missing in DB. Signing out.");
+                await firebase.auth().signOut();
+            }
 
+        } else {
+            // User is signed out
+            console.log('❌ Firebase Auth State Changed: User is signed out');
+            clearSession(); // Clear local cache
+        }
+        
+        // Always update the UI after state change
+        updateNavigation();
+    });
+} else {
+    // Fallback for pages that might not load all scripts in time
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(updateNavigation, 500);
+    });
+}
 
 // Debug function to check auth status
 function debugAuth() {
@@ -278,9 +272,4 @@ function debugAuth() {
         user_role: localStorage.getItem('user_role'),
         user_created_at: localStorage.getItem('user_created_at')
     });
-}
-
-// Call auto-login on login page
-if (window.location.href.includes('login.html')) {
-    document.addEventListener('DOMContentLoaded', autoLoginDemo);
 }
